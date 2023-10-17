@@ -5145,6 +5145,7 @@ class OverrideTests(SimpleTestCase):
         class Person(Form):
             first_name = CharField()
 
+        get_default_renderer.cache_clear()
         t = Template("{{ form }}")
         html = t.render(Context({"form": Person()}))
         expected = """
@@ -5152,12 +5153,14 @@ class OverrideTests(SimpleTestCase):
         <input type="text" name="first_name" required id="id_first_name"></div>
         """
         self.assertHTMLEqual(html, expected)
+        get_default_renderer.cache_clear()
 
     @override_settings(FORM_RENDERER="forms_tests.tests.test_forms.CustomRenderer")
     def test_custom_renderer_field_template_name(self):
         class Person(Form):
             first_name = CharField()
 
+        get_default_renderer.cache_clear()
         t = Template("{{ form.first_name.as_field_group }}")
         html = t.render(Context({"form": Person()}))
         expected = """
@@ -5166,6 +5169,7 @@ class OverrideTests(SimpleTestCase):
         <input type="text" name="first_name" required id="id_first_name">
         """
         self.assertHTMLEqual(html, expected)
+        get_default_renderer.cache_clear()
 
     def test_per_form_template_name(self):
         class Person(Form):

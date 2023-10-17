@@ -6,12 +6,14 @@
     const $ = django.jQuery;
     let popupIndex = 0;
     const relatedWindows = [];
+    const QUOTE_MAP = {};
+    const UNQUOTE_MAP = {};
 
     function dismissChildPopups() {
         relatedWindows.forEach(function(win) {
             if(!win.closed) {
                 win.dismissChildPopups();
-                win.close();    
+                win.close();
             }
         });
     }
@@ -19,7 +21,7 @@
     function setPopupIndex() {
         if(document.getElementsByName("_popup").length > 0) {
             const index = window.name.lastIndexOf("__") + 2;
-            popupIndex = parseInt(window.name.substring(index));   
+            popupIndex = parseInt(window.name.substring(index));
         } else {
             popupIndex = 0;
         }
@@ -76,9 +78,10 @@
         }
         const value = $this.val();
         if (value) {
+            const quotedValue = encodeURIComponent(value);
             siblings.each(function() {
                 const elm = $(this);
-                elm.attr('href', elm.attr('data-href-template').replace('__fk__', value));
+                elm.attr('href', elm.attr('data-href-template').replace('__fk__', quotedValue));
                 elm.removeAttr('aria-disabled');
             });
         } else {
@@ -118,6 +121,7 @@
     }
 
     function dismissAddRelatedObjectPopup(win, newId, newRepr) {
+        newId = decodeURIComponent(newId);
         const name = removePopupIndex(win.name);
         const elem = document.getElementById(name);
         if (elem) {
@@ -148,6 +152,7 @@
     }
 
     function dismissChangeRelatedObjectPopup(win, objId, newRepr, newId) {
+        objId = decodeURIComponent(objId);// unquote objId
         const id = removePopupIndex(win.name.replace(/^edit_/, ''));
         const selectsSelector = interpolate('#%s, #%s_from, #%s_to', [id, id, id]);
         const selects = $(selectsSelector);
@@ -187,6 +192,81 @@
         win.close();
     }
 
+    function encodeURIComponent(s) {
+        // Ensure that primary key values do not confuse the admin URLs by
+        // escaping problematic characters.
+        // This is the JavaScript equivalent to django.contrib.admin.utils.quote().
+
+        if(Object.keys(QUOTE_MAP).length === 0) {
+            const specialChars = '":/_#?;@&=+$,[]<>%\n\\';
+
+            for (let i = 0; i < specialChars.length; i++) {
+                const charCode = specialChars.charCodeAt(i);
+                // Line feed \n character
+                if (charCode === 10) {
+                    QUOTE_MAP[charCode] = '_0A';
+                } else {
+                    const encodedChar = '_' + charCode.toString(16).toUpperCase();
+                    QUOTE_MAP[charCode] = encodedChar;
+                }
+            }
+        }
+
+        if (typeof s === 'string') {
+            let result = '';
+            for (let i = 0; i < s.length; i++) {
+                const charCode = s.charCodeAt(i);
+                const encodedChar = QUOTE_MAP[charCode] || s[i];
+                result += encodedChar;
+            }
+            return result;
+        } else {
+            return s;
+        }
+
+
+    }
+
+
+
+    function decodeURIComponent(s) {
+        if(Object.keys(UNQUOTE_MAP).length === 0 ) {
+            const specialChars = '":/_#?;@&=+$,[]<>%\n\\';
+
+            for (let i = 0; i < specialChars.length; i++) {
+                const charCode = specialChars.charCodeAt(i);
+                // Line feed \n character
+                if (charCode === 10) {
+                    UNQUOTE_MAP[charCode] = '_0A';
+                } else {
+                    const encodedChar = '_' + charCode.toString(16).toUpperCase();
+                    UNQUOTE_MAP[encodedChar] = String.fromCharCode(charCode);
+                }
+            }
+        }
+
+        if (typeof s === 'string') {
+            let result = '';
+            let i = 0;
+            while (i < s.length) {
+                if (s[i] === '_' && i < s.length - 2) {
+                    const encodedChar = s.substr(i, 3);
+                    const decodedChar = UNQUOTE_MAP[encodedChar] || s[i];
+                    result += decodedChar;
+                    i += 3;
+                } else {
+                    result += s[i];
+                    i += 1;
+                }
+            }
+            return result;
+        } else {
+            return s;
+        }
+    }
+
+    window.decodeURIComponent = decodeURIComponent;
+    window.encodeURIComponent = encodeURIComponent;
     window.showRelatedObjectLookupPopup = showRelatedObjectLookupPopup;
     window.dismissRelatedLookupPopup = dismissRelatedLookupPopup;
     window.showRelatedObjectPopup = showRelatedObjectPopup;

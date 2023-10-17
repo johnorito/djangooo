@@ -31,7 +31,6 @@ class DatabaseOperations(BaseDatabaseOperations):
             "ANALYZE",
             "BUFFERS",
             "COSTS",
-            "GENERIC_PLAN",
             "SETTINGS",
             "SUMMARY",
             "TIMING",

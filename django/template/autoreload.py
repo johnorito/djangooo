@@ -39,7 +39,7 @@ def reset_loaders():
         for loader in backend.engine.template_loaders:
             loader.reset()
 
-    backend = getattr(get_default_renderer(), "engine", None)
+    backend = get_default_renderer().engine
     if isinstance(backend, DjangoTemplates):
         for loader in backend.engine.template_loaders:
             loader.reset()

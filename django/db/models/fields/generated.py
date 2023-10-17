@@ -159,6 +159,3 @@ class GeneratedField(Field):
 
     def db_parameters(self, connection):
         return self.output_field.db_parameters(connection)
-
-    def db_type_parameters(self, connection):
-        return self.output_field.db_type_parameters(connection)
