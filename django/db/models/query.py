@@ -752,6 +752,57 @@ class QuerySet(AltersData):
             return OnConflict.UPDATE
         return None
 
+    def _bulk_create_multi_table(
+        self,
+        objs,
+        batch_size,
+        ignore_conflicts,
+        update_conflicts,
+        update_fields,
+        unique_fields,
+    ):
+        # Vérification de la capacité de retour des IDs
+        connection = connections[self.db]
+        can_return_ids = connection.features.can_return_rows_from_bulk_insert
+
+        # Traiter les modèles parents
+        parent_model = None
+        for obj in objs:
+            for parent in obj._meta.get_parent_list():
+                parent_model = parent._meta.concrete_model
+                break
+            if parent_model:
+                break
+
+        if not parent_model:
+            raise ValueError("No parent model found")
+
+        # Créer et insérer les objets parents
+        parent_objs = []
+        for obj in objs:
+            parent_obj = parent_model()
+            for field in parent_model._meta.local_fields:
+                setattr(parent_obj, field.name, getattr(obj, field.name))
+            parent_objs.append(parent_obj)
+
+        # Insérer les parents
+        parent_model.objects.bulk_create(parent_objs, batch_size, ignore_conflicts)
+
+        # Associer les IDs parent aux objets enfant et préparer pour l'insertion
+        if can_return_ids:
+            for parent_obj, obj in zip(parent_objs, objs):
+                setattr(obj, parent_model._meta.model_name + "_ptr", parent_obj)
+
+        # Insérer les modèles enfants
+        self.model.objects.bulk_create(
+            objs,
+            batch_size,
+            ignore_conflicts,
+            update_conflicts,
+            update_fields,
+            unique_fields,
+        )
+
     def bulk_create(
         self,
         objs,
@@ -786,71 +837,94 @@ class QuerySet(AltersData):
         # model to detect the inheritance pattern ConcreteGrandParent ->
         # MultiTableParent -> ProxyChild. Simply checking self.model._meta.proxy
         # would not identify that case as involving multiple tables.
-        for parent in self.model._meta.get_parent_list():
+        """ for parent in self.model._meta.get_parent_list():
             if parent._meta.concrete_model is not self.model._meta.concrete_model:
-                raise ValueError("Can't bulk create a multi-table inherited model")
-        if not objs:
-            return objs
-        opts = self.model._meta
-        if unique_fields:
-            # Primary key is allowed in unique_fields.
-            unique_fields = [
-                self.model._meta.get_field(opts.pk.name if name == "pk" else name)
-                for name in unique_fields
-            ]
-        if update_fields:
-            update_fields = [self.model._meta.get_field(name) for name in update_fields]
-        on_conflict = self._check_bulk_create_options(
-            ignore_conflicts,
-            update_conflicts,
-            update_fields,
-            unique_fields,
-        )
-        self._for_write = True
-        fields = [f for f in opts.concrete_fields if not f.generated]
-        objs = list(objs)
-        self._prepare_for_bulk_create(objs)
-        with transaction.atomic(using=self.db, savepoint=False):
-            objs_with_pk, objs_without_pk = partition(lambda o: o.pk is None, objs)
-            if objs_with_pk:
-                returned_columns = self._batched_insert(
-                    objs_with_pk,
-                    fields,
-                    batch_size,
-                    on_conflict=on_conflict,
-                    update_fields=update_fields,
-                    unique_fields=unique_fields,
-                )
-                for obj_with_pk, results in zip(objs_with_pk, returned_columns):
-                    for result, field in zip(results, opts.db_returning_fields):
-                        if field != opts.pk:
-                            setattr(obj_with_pk, field.attname, result)
-                for obj_with_pk in objs_with_pk:
-                    obj_with_pk._state.adding = False
-                    obj_with_pk._state.db = self.db
-            if objs_without_pk:
-                fields = [f for f in fields if not isinstance(f, AutoField)]
-                returned_columns = self._batched_insert(
-                    objs_without_pk,
-                    fields,
-                    batch_size,
-                    on_conflict=on_conflict,
-                    update_fields=update_fields,
-                    unique_fields=unique_fields,
-                )
-                connection = connections[self.db]
-                if (
-                    connection.features.can_return_rows_from_bulk_insert
-                    and on_conflict is None
-                ):
-                    assert len(returned_columns) == len(objs_without_pk)
-                for obj_without_pk, results in zip(objs_without_pk, returned_columns):
-                    for result, field in zip(results, opts.db_returning_fields):
-                        setattr(obj_without_pk, field.attname, result)
-                    obj_without_pk._state.adding = False
-                    obj_without_pk._state.db = self.db
+                raise ValueError("Can't bulk create a multi-table inherited model") """
 
-        return objs
+        # Vérifier et traiter l'héritage multi-table
+        connection = connections[self.db]
+        if any(
+            parent._meta.concrete_model is not self.model._meta.concrete_model
+            for parent in self.model._meta.get_parent_list()
+        ):
+            self._bulk_create_multi_table(
+                objs,
+                batch_size,
+                ignore_conflicts,
+                update_conflicts,
+                update_fields,
+                unique_fields,
+            )
+        else:
+            if not objs:
+                return objs
+            self._for_write = True
+            # connection = connections[self.db]
+            opts = self.model._meta
+
+            if unique_fields:
+                # Primary key is allowed in unique_fields.
+                unique_fields = [
+                    self.model._meta.get_field(opts.pk.name if name == "pk" else name)
+                    for name in unique_fields
+                ]
+            if update_fields:
+                update_fields = [
+                    self.model._meta.get_field(name) for name in update_fields
+                ]
+            on_conflict = self._check_bulk_create_options(
+                ignore_conflicts,
+                update_conflicts,
+                update_fields,
+                unique_fields,
+            )
+            self._for_write = True
+            fields = [f for f in opts.concrete_fields if not f.generated]
+            objs = list(objs)
+            self._prepare_for_bulk_create(objs)
+            with transaction.atomic(using=self.db, savepoint=False):
+                objs_with_pk, objs_without_pk = partition(lambda o: o.pk is None, objs)
+                if objs_with_pk:
+                    returned_columns = self._batched_insert(
+                        objs_with_pk,
+                        fields,
+                        batch_size,
+                        on_conflict=on_conflict,
+                        update_fields=update_fields,
+                        unique_fields=unique_fields,
+                    )
+                    for obj_with_pk, results in zip(objs_with_pk, returned_columns):
+                        for result, field in zip(results, opts.db_returning_fields):
+                            if field != opts.pk:
+                                setattr(obj_with_pk, field.attname, result)
+                    for obj_with_pk in objs_with_pk:
+                        obj_with_pk._state.adding = False
+                        obj_with_pk._state.db = self.db
+                if objs_without_pk:
+                    fields = [f for f in fields if not isinstance(f, AutoField)]
+                    returned_columns = self._batched_insert(
+                        objs_without_pk,
+                        fields,
+                        batch_size,
+                        on_conflict=on_conflict,
+                        update_fields=update_fields,
+                        unique_fields=unique_fields,
+                    )
+                    connection = connections[self.db]
+                    if (
+                        connection.features.can_return_rows_from_bulk_insert
+                        and on_conflict is None
+                    ):
+                        assert len(returned_columns) == len(objs_without_pk)
+                    for obj_without_pk, results in zip(
+                        objs_without_pk, returned_columns
+                    ):
+                        for result, field in zip(results, opts.db_returning_fields):
+                            setattr(obj_without_pk, field.attname, result)
+                        obj_without_pk._state.adding = False
+                        obj_without_pk._state.db = self.db
+
+            return objs
 
     async def abulk_create(
         self,
