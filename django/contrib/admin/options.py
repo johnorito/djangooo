@@ -1213,11 +1213,20 @@ class ModelAdmin(BaseModelAdmin):
                     connector=models.Q.OR,
                 )
                 term_queries.append(or_queries)
-            queryset = queryset.filter(models.Q.create(term_queries))
+                result_queryset = queryset.none()
+                for orm_lookup in orm_lookups:
+                    try:
+                        # Filter queryset for each ORM lookup
+                        result_queryset |= queryset.filter(models.Q.create([(orm_lookup, bit) for bit in smart_split(search_term)]))
+                    except ValueError:
+                        continue
+
             may_have_duplicates |= any(
                 lookup_spawns_duplicates(self.opts, search_spec)
                 for search_spec in orm_lookups
             )
+            return result_queryset, may_have_duplicates
+
         return queryset, may_have_duplicates
 
     def get_preserved_filters(self, request):
