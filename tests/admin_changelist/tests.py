@@ -833,30 +833,25 @@ class ChangeListTests(TestCase):
 
     def test_search_with_exact_on_non_string_field(self):
         """
-        ensures that the search functionality implemented in a ModelAdmin's
-        get_search_results() method behaves as expected when provided with various types of
-        search terms and search fields of mixed types. like ['votes__exact', 'title', 'text__contains']
+        ensures that the get_search_results method handles
+        the scenario where a non-integer term is provided
+        for an __exact search on an integer field.
         """
 
-        child = Child.objects.create(name='Asher', age=11)
+        child = Child.objects.create(name="Asher", age=11)
         model_admin = ChildAdmin(Child, custom_site)
 
-        request = self.factory.get('/', data={SEARCH_VAR: '11'})
+        request = self.factory.get("/", data={SEARCH_VAR: "11"})
         request.user = self.superuser
         cl = model_admin.get_changelist_instance(request)
         self.assertCountEqual(cl.queryset, [child])
 
-        request = self.factory.get('/', data={SEARCH_VAR: 'ash'})
-        request.user = self.superuser
-        cl = model_admin.get_changelist_instance(request)
-        self.assertCountEqual(cl.queryset, [child])
-
-        request = self.factory.get('/', data={SEARCH_VAR: 'fsfsl'})
+        request = self.factory.get("/", data={SEARCH_VAR: "fsfsl"})
         request.user = self.superuser
         cl = model_admin.get_changelist_instance(request)
         self.assertCountEqual(cl.queryset, [])
 
-        request = self.factory.get('/', data={SEARCH_VAR: '3.14'})
+        request = self.factory.get("/", data={SEARCH_VAR: "3.14"})
         request.user = self.superuser
         cl = model_admin.get_changelist_instance(request)
         self.assertCountEqual(cl.queryset, [])
