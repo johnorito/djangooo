@@ -190,7 +190,7 @@ Management Commands
 Migrations
 ~~~~~~~~~~
 
-* ...
+* The PostgreSQL backend no longer uses ``CASCADE`` when dropping a column.
 
 Models
 ~~~~~~
