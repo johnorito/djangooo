@@ -204,6 +204,12 @@ default value, the operation is irreversible.
 
 .. _dependent objects outside the table are also dropped: https://www.postgresql.org/docs/current/sql-altertable.html#SQL-ALTERTABLE-PARMS-CASCADE
 
+.. versionchanged:: 5.2
+
+    The base and PostgreSQL database backends no longer use ``CASCADE`` to
+    avoid unintentionally side effects. Dependent objects unmanaged by
+    Django itself have to be removed manually before ``RemoveField``.
+
 
 ``AlterField``
 --------------

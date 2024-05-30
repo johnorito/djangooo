@@ -190,7 +190,7 @@ Management Commands
 Migrations
 ~~~~~~~~~~
 
-* The PostgreSQL backend no longer uses ``CASCADE`` when dropping a column.
+* ...
 
 Models
 ~~~~~~
@@ -253,7 +253,8 @@ Database backend API
 This section describes changes that may be needed in third-party database
 backends.
 
-* ...
+* The base and PostgreSQL database backends no longer use ``CASCADE`` when
+  dropping a column.
 
 :mod:`django.contrib.gis`
 -------------------------
