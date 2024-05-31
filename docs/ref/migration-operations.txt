@@ -207,8 +207,9 @@ default value, the operation is irreversible.
 .. versionchanged:: 5.2
 
     The base and PostgreSQL database backends no longer use ``CASCADE`` to
-    avoid unintentionally side effects. Dependent objects unmanaged by
-    Django itself have to be removed manually before ``RemoveField``.
+    delete dependent related database objects, such as views. Any dependent
+    objects that are not managed by Django have to be removed another way
+    before ``RemoveField`` runs.
 
 
 ``AlterField``
