@@ -33,7 +33,26 @@ class AsyncAuthTest(TestCase):
         self.assertIsInstance(user, User)
         self.assertEqual(user.username, self.test_user.username)
 
-    async def test_alogin_without_user(self):
+    async def test_alogin_without_user_no_request_user(self):
+        request = HttpRequest()
+        request.session = await self.client.asession()
+        with self.assertRaisesMessage(
+            AttributeError,
+            "'HttpRequest' object has no attribute 'user'",
+        ):
+            await alogin(request, None)
+
+    async def test_alogin_without_user_anonymous_request(self):
+        request = HttpRequest()
+        request.user = AnonymousUser()
+        request.session = await self.client.asession()
+        with self.assertRaisesMessage(
+            AttributeError,
+            "'AnonymousUser' object has no attribute '_meta'",
+        ):
+            await alogin(request, None)
+
+    async def test_alogin_without_user_authenticated_request(self):
         request = HttpRequest()
         request.user = self.test_user
         request.session = await self.client.asession()
