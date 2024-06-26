@@ -53,10 +53,8 @@ class TestLogin(TestCase):
 
         self.assertNotIn(auth.SESSION_KEY, self.request.session)
 
-        with self.assertWarnsMessage(
-            RemovedInDjango60Warning,
-            "Fallback to request.user when user is None will be removed.",
-        ):
+        msg = "Fallback to request.user when user is None will be removed."
+        with self.assertWarnsMessage(RemovedInDjango60Warning, msg):
             auth.login(self.request, None)
 
         self.assertEqual(self.request.session[auth.SESSION_KEY], str(self.user.pk))
