@@ -272,8 +272,10 @@ class Query(BaseExpression):
 
     # Set combination attributes.
     combinator = None
+    combined_count = 0
     combinator_all = False
     combined_queries = ()
+    combinator_select = ()
 
     # These are for extensions. The contents are more or less appended verbatim
     # to the appropriate clause.
@@ -1202,6 +1204,9 @@ class Query(BaseExpression):
             self.set_annotation_mask(annotation_mask)
         self.annotations[alias] = annotation
 
+    def clear_annotations(self):
+        self.annotations = {}
+
     def resolve_expression(self, query, *args, **kwargs):
         clone = self.clone()
         # Subqueries need to use a different set of aliases than the outer query.
@@ -1650,6 +1655,14 @@ class Query(BaseExpression):
             )
             joinpromoter.add_votes(needed_inner)
             if child_clause:
+                if self.combinator:
+                    children = []
+                    for child in child_clause.children:
+                        child = child.copy()
+                        child.lhs = child.lhs.copy()
+                        child.lhs.alias = 'combined_{}'.format(self.combined_count)
+                        children.append(child)
+                    child_clause.children = children
                 target_clause.add(child_clause, connector)
         if update_join_types:
             needed_inner = joinpromoter.update_join_types(self)
