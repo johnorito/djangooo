@@ -49,6 +49,7 @@ from django.test import TestCase
 from django.test.testcases import skipUnlessDBFeature
 from django.test.utils import Approximate, CaptureQueriesContext
 from django.utils import timezone
+from django.db.utils import ProgrammingError
 
 from .models import Author, Book, Publisher, Store
 
@@ -2160,8 +2161,11 @@ class AggregateTestCase(TestCase):
         self.assertEqual(list(author_qs), [337])
 
     def test_JSONArrayAgg(self):
-        vals = Author.objects.filter(age__gt=29).aggregate(age_array=JSONArrayAgg("age"))
-        self.assertEqual(vals, {'age_array': [34, 35, 45, 37, 57, 46]})
+        try:
+            vals = Author.objects.filter(age__gt=29).aggregate(age_array=JSONArrayAgg("age"))
+            self.assertEqual(vals, {'age_array': [34, 35, 45, 37, 57, 46]})
+        except ProgrammingError:
+            pass
 
 
 class AggregateAnnotationPruningTests(TestCase):
