@@ -17,6 +17,7 @@ from django.db.models import (
     F,
     FloatField,
     IntegerField,
+    JSONArrayAgg,
     Max,
     Min,
     OuterRef,
@@ -30,7 +31,6 @@ from django.db.models import (
     Variance,
     When,
     Window,
-    JSONArrayAgg,
 )
 from django.db.models.expressions import Func, RawSQL
 from django.db.models.functions import (
@@ -45,11 +45,11 @@ from django.db.models.functions import (
     TruncDate,
     TruncHour,
 )
+from django.db.utils import ProgrammingError
 from django.test import TestCase
 from django.test.testcases import skipUnlessDBFeature
 from django.test.utils import Approximate, CaptureQueriesContext
 from django.utils import timezone
-from django.db.utils import ProgrammingError
 
 from .models import Author, Book, Publisher, Store
 
@@ -2162,8 +2162,10 @@ class AggregateTestCase(TestCase):
 
     def test_JSONArrayAgg(self):
         try:
-            vals = Author.objects.filter(age__gt=29).aggregate(age_array=JSONArrayAgg("age"))
-            self.assertEqual(vals, {'age_array': [34, 35, 45, 37, 57, 46]})
+            vals = Author.objects.filter(age__gt=29).aggregate(
+                age_array=JSONArrayAgg("age")
+            )
+            self.assertEqual(vals, {"age_array": [34, 35, 45, 37, 57, 46]})
         except ProgrammingError:
             pass
 

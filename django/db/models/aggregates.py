@@ -16,12 +16,12 @@ __all__ = [
     "Aggregate",
     "Avg",
     "Count",
+    "JSONArrayAgg",
     "Max",
     "Min",
     "StdDev",
     "Sum",
     "Variance",
-    "JSONArrayAgg",
 ]
 
 
@@ -214,11 +214,14 @@ class Variance(NumericOutputFieldMixin, Aggregate):
     def _get_repr_options(self):
         return {**super()._get_repr_options(), "sample": self.function == "VAR_SAMP"}
 
+
 class JSONArrayAgg(Aggregate):
     name = "JSONArrayAgg"
     output_field = JSONField()
     arity = 1
 
     def __init__(self, expression, **extra):
-        self.function = "JSON_GROUP_ARRAY" if connection.vendor == "sqlite" else "JSON_ARRAYAGG"
+        self.function = (
+            "JSON_GROUP_ARRAY" if connection.vendor == "sqlite" else "JSON_ARRAYAGG"
+        )
         super().__init__(expression, **extra)
