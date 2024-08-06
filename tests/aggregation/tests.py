@@ -21,6 +21,7 @@ from django.db.models import (
     Max,
     Min,
     OuterRef,
+    Q,
     StdDev,
     Subquery,
     Sum,
