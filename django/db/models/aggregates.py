@@ -222,7 +222,20 @@ class JSONArrayAgg(Aggregate):
     arity = 1
 
     def as_sqlite(self, compiler, connection, **extra_context):
-        "Use JSON_GROUP_ARRAY function on SQLite."
-        return super().as_sqlite(
+        return super().as_sql(
             compiler, connection, function="JSON_GROUP_ARRAY", **extra_context
         )
+
+    def as_postgresql(self, compiler, connection, **extra_context):
+        sql, params = super().as_sql(compiler, connection, **extra_context)
+        if not connection.features.is_postgresql_16:
+            sql, params = super().as_sql(
+                compiler,
+                connection,
+                function="ARRAY_AGG",
+                template="TO_JSON(%(function)s(%(distinct)s%(expressions)s))",
+                **extra_context,
+            )
+        if self.output_field.get_internal_type() == "JSONField":
+            sql = "CAST(%s AS JSONB)" % sql
+        return sql, params
