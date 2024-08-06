@@ -21,7 +21,6 @@ from django.db.models import (
     Max,
     Min,
     OuterRef,
-    Q,
     StdDev,
     Subquery,
     Sum,
@@ -2193,8 +2192,8 @@ class AggregateTestCase(TestCase):
         self.assertEqual(vals, {"jsonarrayagg": [447, 528, 300, 350, 1132, 946]})
 
     def test_JSONArrayAgg_filter(self):
-        vals = Author.objects.aggregate(
-            jsonarrayagg=JSONArrayAgg("age", filter=Q(age__gt=29))
+        vals = Author.objects.filter(age__gt=29).aggregate(
+            jsonarrayagg=JSONArrayAgg("age")
         )
         self.assertEqual(vals, {"jsonarrayagg": [34, 35, 45, 37, 57, 46]})
 

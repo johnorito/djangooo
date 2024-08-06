@@ -228,7 +228,7 @@ class JSONArrayAgg(Aggregate):
 
     def as_postgresql(self, compiler, connection, **extra_context):
         if not connection.features.is_postgresql_16:
-            return super().as_sql(
+            sql, params = super().as_sql(
                 compiler,
                 connection,
                 function="ARRAY_AGG",
