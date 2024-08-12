@@ -150,7 +150,8 @@ Email
 Error Reporting
 ~~~~~~~~~~~~~~~
 
-* ...
+* The attribute :attr:`.SafeExceptionReporterFilter.hidden_settings` now
+  treats values as sensitive if their name includes ``AUTH``.
 
 File Storage
 ~~~~~~~~~~~~
@@ -165,7 +166,15 @@ File Uploads
 Forms
 ~~~~~
 
-* ...
+* The new :class:`~django.forms.ColorInput` form widget is for entering a color
+  in ``rrggbb`` hexadecimal format and renders as ``<input type="color" ...>``.
+  Some browsers support a visual color picker interface for this input type.
+
+* The new :class:`~django.forms.SearchInput` form widget is for entering search
+  queries and renders as ``<input type="search" ...>``.
+
+* The new :class:`~django.forms.TelInput` form widget is for entering telephone
+  numbers and renders as ``<input type="tel" ...>``.
 
 Generic Views
 ~~~~~~~~~~~~~
@@ -185,7 +194,10 @@ Logging
 Management Commands
 ~~~~~~~~~~~~~~~~~~~
 
-* ...
+* A new warning is printed to the console when running :djadmin:`runserver` that
+  ``runserver`` is unsuitable for production. This warning can be hidden by
+  setting the :envvar:`HIDE_PRODUCTION_WARNING` environment variable to
+  ``"true"``.
 
 Migrations
 ~~~~~~~~~~
@@ -195,7 +207,13 @@ Migrations
 Models
 ~~~~~~
 
-* ...
+* The ``SELECT`` clause generated when using
+  :meth:`QuerySet.values()<django.db.models.query.QuerySet.values>` and
+  :meth:`~django.db.models.query.QuerySet.values_list` now matches the
+  specified order of the referenced expressions. Previously the order was based
+  of a set of counterintuitive rules which made query combination through
+  methods such as
+  :meth:`QuerySet.union()<django.db.models.query.QuerySet.union>` unpredictable.
 
 Requests and Responses
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -225,7 +243,9 @@ Templates
 Tests
 ~~~~~
 
-* ...
+* Stack frames from Django's custom assertions are now hidden. This makes test
+  failures easier to read and enables :option:`test --pdb` to directly enter
+  into the failing test method.
 
 URLs
 ~~~~
@@ -269,7 +289,9 @@ PostgreSQL 14 and higher.
 Miscellaneous
 -------------
 
-* ...
+* :attr:`EmailMultiAlternatives.alternatives
+  <django.core.mail.EmailMultiAlternatives.alternatives>` should only be added
+  to using :meth:`~django.core.mail.EmailMultiAlternatives.attach_alternative`.
 
 .. _deprecated-features-5.2:
 

@@ -67,6 +67,9 @@ __all__ = (
     "skipUnlessDBFeature",
 )
 
+# Make unittest ignore frames in this module when reporting failures.
+__unittest = True
+
 
 if not PY311:
     # Backport of unittest.case._enter_context() from Python 3.11.
@@ -405,8 +408,8 @@ class SimpleTestCase(unittest.TestCase):
 
     def modify_settings(self, **kwargs):
         """
-        A context manager that temporarily applies changes a list setting and
-        reverts back to the original value when exiting the context.
+        A context manager that temporarily applies changes to a list setting
+        and reverts back to the original value when exiting the context.
         """
         return modify_settings(**kwargs)
 

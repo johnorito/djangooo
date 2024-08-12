@@ -1333,14 +1333,19 @@ class Model(AltersData, metaclass=ModelBase):
             setattr(self, cachename, obj)
         return getattr(self, cachename)
 
-    def _get_field_value_map(self, meta, exclude=None):
+    def _get_field_expression_map(self, meta, exclude=None):
         if exclude is None:
             exclude = set()
         meta = meta or self._meta
         field_map = {
-            field.name: Value(getattr(self, field.attname), field)
+            field.name: (
+                value
+                if (value := getattr(self, field.attname))
+                and hasattr(value, "resolve_expression")
+                else Value(value, field)
+            )
             for field in meta.local_concrete_fields
-            if field.name not in exclude
+            if field.name not in exclude and not field.generated
         }
         if "pk" not in exclude:
             field_map["pk"] = Value(self.pk, meta.pk)

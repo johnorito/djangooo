@@ -95,18 +95,18 @@ class FileStorageTests(SimpleTestCase):
         """
         Standard file access options are available, and work as expected.
         """
-        self.assertFalse(os.path.exists(os.path.join(self.temp_dir, "storage_test")))
+        self.assertFalse(self.storage.exists("storage_test"))
         f = self.storage.open("storage_test", "w")
         f.write("storage contents")
         f.close()
-        self.assertTrue(os.path.exists(os.path.join(self.temp_dir, "storage_test")))
+        self.assertTrue(self.storage.exists("storage_test"))
 
         f = self.storage.open("storage_test", "r")
         self.assertEqual(f.read(), "storage contents")
         f.close()
 
         self.storage.delete("storage_test")
-        self.assertFalse(os.path.exists(os.path.join(self.temp_dir, "storage_test")))
+        self.assertFalse(self.storage.exists("storage_test"))
 
     def _test_file_time_getter(self, getter):
         # Check for correct behavior under both USE_TZ=True and USE_TZ=False.
@@ -275,10 +275,10 @@ class FileStorageTests(SimpleTestCase):
         """
         Saving a pathname should create intermediate directories as necessary.
         """
-        self.assertFalse(os.path.exists(os.path.join(self.temp_dir, "path/to")))
+        self.assertFalse(self.storage.exists("path/to"))
         self.storage.save("path/to/test.file", ContentFile("file saved with path"))
 
-        self.assertTrue(os.path.exists(os.path.join(self.temp_dir, "path/to")))
+        self.assertTrue(self.storage.exists("path/to"))
         with self.storage.open("path/to/test.file") as f:
             self.assertEqual(f.read(), b"file saved with path")
 
@@ -288,22 +288,17 @@ class FileStorageTests(SimpleTestCase):
 
         self.storage.delete("path/to/test.file")
 
-    def test_file_save_abs_path(self):
-        test_name = "path/to/test.file"
-        f = ContentFile("file saved with path")
-        f_name = self.storage.save(os.path.join(self.temp_dir, test_name), f)
-        self.assertEqual(f_name, test_name)
-
     @unittest.skipUnless(
         symlinks_supported(), "Must be able to symlink to run this test."
     )
     def test_file_save_broken_symlink(self):
         """A new path is created on save when a broken symlink is supplied."""
         nonexistent_file_path = os.path.join(self.temp_dir, "nonexistent.txt")
-        broken_symlink_path = os.path.join(self.temp_dir, "symlink.txt")
+        broken_symlink_file_name = "symlink.txt"
+        broken_symlink_path = os.path.join(self.temp_dir, broken_symlink_file_name)
         os.symlink(nonexistent_file_path, broken_symlink_path)
         f = ContentFile("some content")
-        f_name = self.storage.save(broken_symlink_path, f)
+        f_name = self.storage.save(broken_symlink_file_name, f)
         self.assertIs(os.path.exists(os.path.join(self.temp_dir, f_name)), True)
 
     def test_save_doesnt_close(self):
@@ -697,12 +692,12 @@ class OverwritingStorageTests(FileStorageTests):
         stored_name_1 = self.storage.save(name, f_1)
         try:
             self.assertEqual(stored_name_1, name)
-            self.assertTrue(os.path.exists(os.path.join(self.temp_dir, name)))
+            self.assertTrue(self.storage.exists(name))
             with self.storage.open(name) as fp:
                 self.assertEqual(fp.read(), content_1)
             stored_name_2 = self.storage.save(name, f_2)
             self.assertEqual(stored_name_2, name)
-            self.assertTrue(os.path.exists(os.path.join(self.temp_dir, name)))
+            self.assertTrue(self.storage.exists(name))
             with self.storage.open(name) as fp:
                 self.assertEqual(fp.read(), content_2)
         finally:
@@ -733,6 +728,22 @@ class OverwritingStorageTests(FileStorageTests):
                 self.assertEqual(fp.read(), content_2)
         finally:
             self.storage.delete(name)
+
+    def test_file_name_truncation(self):
+        name = "test_long_file_name.txt"
+        file = ContentFile(b"content")
+        stored_name = self.storage.save(name, file, max_length=10)
+        self.addCleanup(self.storage.delete, stored_name)
+        self.assertEqual(stored_name, "test_l.txt")
+        self.assertEqual(len(stored_name), 10)
+
+    def test_file_name_truncation_extension_too_long(self):
+        name = "file_name.longext"
+        file = ContentFile(b"content")
+        with self.assertRaisesMessage(
+            SuspiciousFileOperation, "Storage can not find an available filename"
+        ):
+            self.storage.save(name, file, max_length=5)
 
 
 class DiscardingFalseContentStorage(FileSystemStorage):
@@ -933,6 +944,20 @@ class FileFieldStorageTests(TestCase):
         self.assertEqual(obj.default.read(), b"default content")
         obj.default.close()
 
+    def test_filefield_db_default(self):
+        temp_storage.save("tests/db_default.txt", ContentFile("default content"))
+        obj = Storage.objects.create()
+        self.assertEqual(obj.db_default.name, "tests/db_default.txt")
+        self.assertEqual(obj.db_default.read(), b"default content")
+        obj.db_default.close()
+
+        # File is not deleted, even if there are no more objects using it.
+        obj.delete()
+        s = Storage()
+        self.assertEqual(s.db_default.name, "tests/db_default.txt")
+        self.assertEqual(s.db_default.read(), b"default content")
+        s.db_default.close()
+
     def test_empty_upload_to(self):
         # upload_to can be empty, meaning it does not use subdirectory.
         obj = Storage()
@@ -997,6 +1022,23 @@ class FileFieldStorageTests(TestCase):
         temp_storage.save("tests/stringio", output)
         self.assertTrue(temp_storage.exists("tests/stringio"))
         with temp_storage.open("tests/stringio") as f:
+            self.assertEqual(f.read(), b"content")
+
+    @override_settings(
+        STORAGES={
+            DEFAULT_STORAGE_ALIAS: {
+                "BACKEND": "django.core.files.storage.InMemoryStorage"
+            }
+        }
+    )
+    def test_create_file_field_from_another_file_field_in_memory_storage(self):
+        f = ContentFile("content", "file.txt")
+        obj = Storage.objects.create(storage_callable_default=f)
+        new_obj = Storage.objects.create(
+            storage_callable_default=obj.storage_callable_default.file
+        )
+        storage = callable_default_storage()
+        with storage.open(new_obj.storage_callable_default.name) as f:
             self.assertEqual(f.read(), b"content")
 
 
