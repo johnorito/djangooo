@@ -227,6 +227,12 @@ Models
   longer required to be set on SQLite, which supports unlimited ``VARCHAR``
   columns.
 
+* Adds ``order_by`` support and the
+  :attr:`~django.db.models.Aggregate.allow_order_by` class attribute to
+  :class:`~django.db.models.Aggregate`.
+
+* Adds :class:`~django.db.models.StringAgg`.
+
 Requests and Responses
 ~~~~~~~~~~~~~~~~~~~~~~
 
