@@ -32,6 +32,15 @@ class QueryStringTagTests(SimpleTestCase):
         request = self.request_factory.get("/", {"x": "y", "a": "b"})
         self.assertRenderEqual("querystring_multiple", request, expected="?x=y&amp;a=b")
 
+    @setup({"test_querystring_empty_params": "{% querystring qd %}"})
+    def test_querystring_empty_params(self):
+        cases = [None, {}, QueryDict()]
+        for param in cases:
+            with self.subTest(param=param):
+                self.assertRenderEqual(
+                    "test_querystring_empty_params", qd=param, expected=""
+                )
+
     @setup({"querystring_replace": "{% querystring a=1 %}"})
     def test_querystring_replace(self):
         request = self.request_factory.get("/", {"x": "y", "a": "b"})
@@ -60,6 +69,14 @@ class QueryStringTagTests(SimpleTestCase):
     def test_querystring_add_list(self):
         self.assertRenderEqual(
             "querystring_list", my_list=[2, 3], expected="?a=2&amp;a=3"
+        )
+
+    @setup({"querystring_dict": "{% querystring a=my_dict %}"})
+    def test_querystring_add_dict(self):
+        self.assertRenderEqual(
+            "querystring_dict",
+            my_dict={i: i * 2 for i in range(3)},
+            expected="?a=0&amp;a=1&amp;a=2",
         )
 
     @setup({"querystring_query_dict": "{% querystring request.GET a=2 %}"})
