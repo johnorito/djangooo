@@ -217,7 +217,6 @@ class Variance(NumericOutputFieldMixin, Aggregate):
 
 class JSONArrayAgg(Aggregate):
     function = "JSON_ARRAYAGG"
-    name = "JSONArrayAgg"
     output_field = JSONField()
     arity = 1
 
@@ -232,11 +231,8 @@ class JSONArrayAgg(Aggregate):
                 compiler,
                 connection,
                 function="ARRAY_AGG",
-                template="TO_JSON(%(function)s(%(distinct)s%(expressions)s))",
                 **extra_context,
             )
-        else:
-            sql, params = super().as_sql(compiler, connection, **extra_context)
-        if self.output_field.get_internal_type() == "JSONField":
-            sql = "CAST(%s AS JSONB)" % sql
-        return sql, params
+            return f"TO_JSONB({sql})", params
+        self.template = "%(function)s(%(distinct)s%(expressions)s RETURNING JSONB)"
+        return self.as_sql(compiler, connection, **extra_context)

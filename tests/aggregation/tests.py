@@ -2193,10 +2193,35 @@ class AggregateTestCase(TestCase):
         self.assertEqual(vals, {"jsonarrayagg": [447, 528, 300, 350, 1132, 946]})
 
     def test_JSONArrayAgg_filter(self):
-        vals = Author.objects.filter(age__gt=29).aggregate(
-            jsonarrayagg=JSONArrayAgg("age")
+        vals = Author.objects.aggregate(
+            jsonarrayagg=JSONArrayAgg("age", filter=Q(age__gt=29))
         )
-        self.assertEqual(vals, {"jsonarrayagg": [34, 35, 45, 37, 57, 46]})
+        if connection.vendor == "mysql":
+            self.assertEqual(
+                vals, {"jsonarrayagg": [34, 35, 45, None, 37, None, None, 57, 46]}
+            )
+        else:
+            self.assertEqual(vals, {"jsonarrayagg": [34, 35, 45, 37, 57, 46]})
+
+    def test_JSONArrayAgg_empty_result_set(self):
+        Author.objects.all().delete()
+
+        val = Author.objects.aggregate(jsonarrayagg=JSONArrayAgg("age"))
+        if connection.vendor == "sqlite":
+            self.assertEqual(val, {"jsonarrayagg": []})
+        else:
+            self.assertEqual(val, {"jsonarrayagg": None})
+
+    def test_JSONArrayAgg_default_set(self):
+        Author.objects.all().delete()
+
+        val = Author.objects.aggregate(
+            jsonarrayagg=JSONArrayAgg("name", default=["<empty>"])
+        )
+        if connection.vendor == "sqlite":
+            self.assertEqual(val, {"jsonarrayagg": []})
+        else:
+            self.assertEqual(val, {"jsonarrayagg": ["<empty>"]})
 
 
 class AggregateAnnotationPruningTests(TestCase):
