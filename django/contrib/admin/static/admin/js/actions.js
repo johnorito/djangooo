@@ -52,10 +52,7 @@
         actionCheckboxes.forEach(function(el) {
             el.checked = checked;
             if (!options.inline) {
-                el.closest('tr').classList.toggle(
-                    options.selectedClass,
-                    checked,
-                );
+                el.closest('tr').classList.toggle(options.selectedClass, checked);
             }
         });
     }
@@ -148,20 +145,17 @@
         if (!options.inline) {
             document
                 .getElementById(options.allToggleId)
-                .addEventListener('click', function (event) {
+                .addEventListener('click', function(event) {
                     checker(actionCheckboxes, options, this.checked);
                     updateCounter(actionCheckboxes, options);
                 });
 
             Array.from(document.getElementById('result_list').tBodies).forEach(
-                function (el) {
-                    el.addEventListener('change', function (event) {
+                function(el) {
+                    el.addEventListener('change', function(event) {
                         const target = event.target;
                         if (target.classList.contains('action-select')) {
-                            const checkboxes = affectedCheckboxes(
-                                target,
-                                shiftPressed,
-                            );
+                            const checkboxes = affectedCheckboxes(target, shiftPressed);
                             checker(checkboxes, options, target.checked);
                             updateCounter(actionCheckboxes, options);
                             lastChecked = target;
@@ -169,10 +163,9 @@
                             list_editable_changed = true;
                         }
                     });
-                },
-            );
+                });
 
-            document.querySelector('#changelist-form button[name=index]').addEventListener('click', function (event) {
+            document.querySelector('#changelist-form button[name=index]').addEventListener('click', function(event) {
                 if (list_editable_changed) {
                     const confirmed = confirm(gettext("You have unsaved changes on individual editable fields. If you run an action, your unsaved changes will be lost."));
                     if (!confirmed) {
@@ -186,10 +179,10 @@
             const tabular_inline_tables = document.getElementsByClassName('tabular_inline_table');
             if (tabular_inline_tables) {
                 Array.from(tabular_inline_tables).forEach(
-                    function (tabular_inline_table) {
+                    function(tabular_inline_table) {
                         Array.from(tabular_inline_table.tBodies).forEach(
-                            function (el) {
-                                el.addEventListener('change', function (event) {
+                            function(el) {
+                                el.addEventListener('change', function(event) {
                                     const target = event.target;
                                     if (
                                         lastChecked &&
@@ -197,28 +190,19 @@
                                         lastChecked.name.slice(0, -9) ===
                                             target.name.slice(0, -9)
                                     ) {
-                                        const checkboxes = affectedCheckboxes(
-                                            target,
-                                            shiftPressed,
-                                        );
-                                        checker(
-                                            checkboxes,
-                                            options,
-                                            target.checked,
-                                        );
+                                        const checkboxes = affectedCheckboxes(target, shiftPressed);
+                                        checker(checkboxes, options, target.checked);
                                     }
                                     lastChecked = target;
                                 });
-                            },
-                        );
-                    },
-                );
+                            });
+                    });
             }
 
             const stacked_inlines = document.getElementsByClassName('inline-related');
             if (stacked_inlines) {
-                Array.from(stacked_inlines).forEach(function (el) {
-                    el.addEventListener('change', function (event) {
+                Array.from(stacked_inlines).forEach(function(el) {
+                    el.addEventListener('change', function(event) {
                         const target = event.target;
                         if (
                             lastChecked &&
@@ -226,10 +210,7 @@
                             lastChecked.name.slice(0, -9) ===
                                 target.name.slice(0, -9)
                         ) {
-                            const checkboxes = affectedCheckboxes(
-                                target,
-                                shiftPressed,
-                            );
+                            const checkboxes = affectedCheckboxes(target, shiftPressed);
                             checker(checkboxes, options, target.checked);
                         }
                         lastChecked = target;
@@ -274,15 +255,12 @@
             Actions(actionsEls);
         }
         const tabularActionsEls = document.querySelectorAll(
-            'td.delete input[type="checkbox"]',
-        );
+            'td.delete input[type="checkbox"]');
         if (tabularActionsEls.length > 0) {
             defaults.inline = true;
             Actions(tabularActionsEls);
         }
-        const stackedActionsEls = document.querySelectorAll(
-            'span.delete input[type="checkbox"]',
-        );
+        const stackedActionsEls = document.querySelectorAll('span.delete input[type="checkbox"]');
         if (stackedActionsEls.length > 0) {
             defaults.inline = true;
             Actions(stackedActionsEls);
