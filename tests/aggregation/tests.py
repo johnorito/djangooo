@@ -2223,6 +2223,15 @@ class AggregateTestCase(TestCase):
         else:
             self.assertEqual(val, {"jsonarrayagg": ["<empty>"]})
 
+    def test_JSONArrayAgg_distinct_false(self):
+        val = Author.objects.aggregate(jsonarrayagg=JSONArrayAgg("age", distinct=False))
+        self.assertEqual(val, {"jsonarrayagg": [34, 35, 45, 29, 37, 29, 25, 57, 46]})
+
+    def test_JSONArrayAgg_distinct_true(self):
+        msg = "JSONArrayAgg does not allow distinct."
+        with self.assertRaisesMessage(TypeError, msg):
+            JSONArrayAgg("age", distinct=True)
+
 
 class AggregateAnnotationPruningTests(TestCase):
     @classmethod

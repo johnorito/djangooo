@@ -219,7 +219,7 @@ class JSONArrayAgg(Aggregate):
     function = "JSON_ARRAYAGG"
     output_field = JSONField()
     arity = 1
-
+    
     def as_sqlite(self, compiler, connection, **extra_context):
         return super().as_sql(
             compiler, connection, function="JSON_GROUP_ARRAY", **extra_context
