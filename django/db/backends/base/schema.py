@@ -594,6 +594,15 @@ class BaseDatabaseSchemaEditor:
         if sql:
             self.execute(sql)
 
+    def alter_constraint(self, model, old_constraint, new_constraint):
+        if not self._constraint_should_be_altered(old_constraint, new_constraint):
+            return
+        remove_sql = old_constraint.remove_sql(model, self)
+        add_sql = new_constraint.create_sql(model, self)
+        if remove_sql and add_sql:
+            self.execute(remove_sql)
+            self.execute(add_sql, params=None)
+
     def alter_unique_together(self, model, old_unique_together, new_unique_together):
         """
         Deal with a model changing its unique_together. The input
@@ -1641,6 +1650,17 @@ class BaseDatabaseSchemaEditor:
             ):
                 output.append(index.create_sql(model, self))
         return output
+
+    def _constraint_should_be_altered(self, old_constraint, new_constraint):
+        old_path, old_args, old_kwargs = old_constraint.deconstruct()
+        new_path, new_args, new_kwargs = new_constraint.deconstruct()
+
+        for attr in old_constraint.non_db_attrs:
+            old_kwargs.pop(attr, None)
+        for attr in new_constraint.non_db_attrs:
+            new_kwargs.pop(attr, None)
+
+        return (old_path, old_args, old_kwargs) != (new_path, new_args, new_kwargs)
 
     def _field_indexes_sql(self, model, field):
         """

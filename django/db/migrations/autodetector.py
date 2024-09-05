@@ -219,6 +219,7 @@ class MigrationAutodetector:
         self.generate_altered_unique_together()
         self.generate_added_indexes()
         self.generate_added_constraints()
+        self.generate_altered_constraints()
         self.generate_altered_db_table()
 
         self._sort_migrations()
@@ -1461,14 +1462,35 @@ class MigrationAutodetector:
 
             old_constraints = old_model_state.options[option_name]
             new_constraints = new_model_state.options[option_name]
-            add_constraints = [c for c in new_constraints if c not in old_constraints]
-            rem_constraints = [c for c in old_constraints if c not in new_constraints]
+
+            alt_constraints = []
+            alt_constraints_name = []
+
+            for old_c in old_constraints:
+                for new_c in new_constraints:
+                    old_c_dec = old_c.deconstruct()
+                    new_c_dec = new_c.deconstruct()
+                    if old_c_dec != new_c_dec and old_c.name == new_c.name:
+                        alt_constraints.append(new_c)
+                        alt_constraints_name.append(new_c.name)
+
+            add_constraints = [
+                c
+                for c in new_constraints
+                if c not in old_constraints and c.name not in alt_constraints_name
+            ]
+            rem_constraints = [
+                c
+                for c in old_constraints
+                if c not in new_constraints and c.name not in alt_constraints_name
+            ]
 
             self.altered_constraints.update(
                 {
                     (app_label, model_name): {
                         "added_constraints": add_constraints,
                         "removed_constraints": rem_constraints,
+                        "altered_constraints": alt_constraints,
                     }
                 }
             )
@@ -1501,6 +1523,23 @@ class MigrationAutodetector:
                         model_name=model_name,
                         name=constraint.name,
                     ),
+                )
+
+    def generate_altered_constraints(self):
+        for (
+            app_label,
+            model_name,
+        ), alt_constraints in self.altered_constraints.items():
+            dependencies = self._get_dependencies_for_model(app_label, model_name)
+            for constraint in alt_constraints["altered_constraints"]:
+                self.add_operation(
+                    app_label,
+                    operations.AlterConstraint(
+                        model_name=model_name,
+                        name=constraint.name,
+                        constraint=constraint,
+                    ),
+                    dependencies=dependencies,
                 )
 
     @staticmethod

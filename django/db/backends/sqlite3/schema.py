@@ -489,5 +489,19 @@ class DatabaseSchemaEditor(BaseDatabaseSchemaEditor):
         else:
             self._remake_table(model)
 
+    def alter_constraint(self, model, old_constraint, new_constraint):
+        if not self._constraint_should_be_altered(old_constraint, new_constraint):
+            return
+
+        if isinstance(new_constraint, UniqueConstraint) and (
+            new_constraint.condition
+            or new_constraint.contains_expressions
+            or new_constraint.include
+            or new_constraint.deferrable
+        ):
+            super().alter_constraint(model, old_constraint, new_constraint)
+        else:
+            self._remake_table(model)
+
     def _collate_sql(self, collation):
         return "COLLATE " + collation

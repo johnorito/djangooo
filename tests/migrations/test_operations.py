@@ -4366,6 +4366,170 @@ class OperationTests(OperationTestBase):
             {"model_name": "Pony", "name": "test_remove_constraint_pony_pink_gt_2"},
         )
 
+    def test_alter_constraint(self):
+        constraint_1 = models.CheckConstraint(
+            condition=models.Q(pink__gt=2), name="test_alter_constraint_pony_pink_gt_2"
+        )
+        constraint_2 = models.UniqueConstraint(
+            fields=["pink"], name="test_alter_constraint_pony_fields_uq"
+        )
+        project_state = self.set_up_test_model(
+            "test_alterconstraint", constraints=[constraint_1, constraint_2]
+        )
+        ck_operation = migrations.AlterConstraint(
+            "Pony",
+            "test_alter_constraint_pony_pink_gt_2",
+            models.CheckConstraint(
+                condition=models.Q(pink__gt=3),
+                name="test_alter_constraint_pony_pink_gt_2",
+            ),
+        )
+        self.assertEqual(
+            ck_operation.describe(),
+            "Alter constraint test_alter_constraint_pony_pink_gt_2 on Pony",
+        )
+        self.assertEqual(
+            ck_operation.formatted_description(),
+            "~ Alter constraint test_alter_constraint_pony_pink_gt_2 on Pony",
+        )
+        self.assertEqual(
+            ck_operation.migration_name_fragment,
+            "alter_pony_test_alter_constraint_pony_pink_gt_2",
+        )
+        # Test state alteration
+        new_state = project_state.clone()
+        ck_operation.state_forwards("test_alterconstraint", new_state)
+        Pony = new_state.apps.get_model("test_alterconstraint", "Pony")
+        self.assertEqual(
+            len(
+                new_state.models["test_alterconstraint", "pony"].options["constraints"]
+            ),
+            2,
+        )
+        self.assertEqual(len(Pony._meta.constraints), 2)
+        # Test the database alteration
+        with (
+            connection.schema_editor() as editor,
+            CaptureQueriesContext(connection) as ctx,
+        ):
+            ck_operation.database_forwards(
+                "test_alterconstraint", editor, project_state, new_state
+            )
+        if connection.features.supports_table_check_constraints:
+            with self.assertRaises(IntegrityError), transaction.atomic():
+                Pony.objects.create(pink=3)
+        else:
+            self.assertIs(
+                any("CHECK" in query["sql"] for query in ctx.captured_queries), False
+            )
+            Pony.objects.create(pink=3)
+        # Test other
+        uq_constraint = models.UniqueConstraint(
+            fields=["pink", "weight"],
+            name="test_alter_constraint_pony_fields_uq",
+        )
+        uq_operation = migrations.AlterConstraint(
+            "Pony", "test_alter_constraint_pony_fields_uq", uq_constraint
+        )
+        self.assertEqual(
+            uq_operation.describe(),
+            "Alter constraint test_alter_constraint_pony_fields_uq on Pony",
+        )
+        self.assertEqual(
+            uq_operation.formatted_description(),
+            "~ Alter constraint test_alter_constraint_pony_fields_uq on Pony",
+        )
+        self.assertEqual(
+            uq_operation.migration_name_fragment,
+            "alter_pony_test_alter_constraint_pony_fields_uq",
+        )
+        # Test state alteration
+        uq_operation.state_forwards("test_alterconstraint", new_state)
+        self.assertEqual(
+            len(
+                new_state.models["test_alterconstraint", "pony"].options["constraints"]
+            ),
+            2,
+        )
+        # Test database alteration
+        with connection.schema_editor() as editor:
+            uq_operation.database_forwards(
+                "test_alterconstraint", editor, project_state, new_state
+            )
+        # Test constraint works
+        Pony.objects.create(pink=4, weight=4)
+        Pony.objects.create(pink=4, weight=5)
+        Pony.objects.create(pink=5, weight=4)
+        with self.assertRaises(IntegrityError), transaction.atomic():
+            Pony.objects.create(pink=4, weight=4)
+        # Test reversal
+        Pony.objects.all().delete()
+        with connection.schema_editor() as editor:
+            ck_operation.database_backwards(
+                "test_alterconstraint", editor, new_state, project_state
+            )
+        Pony.objects.create(pink=3, weight=2)
+        with connection.schema_editor() as editor:
+            uq_operation.database_backwards(
+                "test_alterconstraint", editor, new_state, project_state
+            )
+        with self.assertRaises(IntegrityError), transaction.atomic():
+            Pony.objects.create(pink=3, weight=3)
+
+    def test_alter_constraint_add_violation_message_noop(self):
+        violation_error_message = "pink field has to be unique"
+        project_state = self.set_up_test_model(
+            "test_alterconstraint_noop",
+            constraints=[
+                models.UniqueConstraint(
+                    fields=["pink"], name="test_alter_constraint_pink_noop"
+                )
+            ],
+        )
+        noop_operation = migrations.AlterConstraint(
+            "Pony",
+            "test_alter_constraint_pink_noop",
+            models.UniqueConstraint(
+                fields=["pink"],
+                name="test_alter_constraint_pink_noop",
+                violation_error_message=violation_error_message,
+            ),
+        )
+        new_state = project_state.clone()
+        # Test state
+        noop_operation.state_forwards("test_alterconstraint_noop", new_state)
+        self.assertEqual(
+            project_state.models["test_alterconstraint_noop", "pony"]
+            .options["constraints"][0]
+            .violation_error_message,
+            "Constraint “%(name)s” is violated.",
+        )
+        self.assertEqual(
+            new_state.models["test_alterconstraint_noop", "pony"]
+            .options["constraints"][0]
+            .violation_error_message,
+            violation_error_message,
+        )
+        # Test database alteration
+        with connection.schema_editor() as editor, self.assertNumQueries(0):
+            noop_operation.database_forwards(
+                "test_alterconstraint_noop", editor, project_state, new_state
+            )
+        self.assertConstraintExists(
+            "test_alterconstraint_noop_pony",
+            "test_alter_constraint_pink_noop",
+            value=False,
+        )
+        with connection.schema_editor() as editor, self.assertNumQueries(0):
+            noop_operation.database_backwards(
+                "test_alterconstraint_noop", editor, new_state, project_state
+            )
+        self.assertConstraintExists(
+            "test_alterconstraint_noop_pony",
+            "test_alter_constraint_pink_noop",
+            value=False,
+        )
+
     def test_add_partial_unique_constraint(self):
         project_state = self.set_up_test_model("test_addpartialuniqueconstraint")
         partial_unique_constraint = models.UniqueConstraint(
