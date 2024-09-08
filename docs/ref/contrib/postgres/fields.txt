@@ -933,7 +933,7 @@ Django includes two PostgreSQL-specific UUID field types for working with UUIDs:
 .. class:: UUID4Field(**options)
 
 
-.. versionadded:: 6.0
+.. versionadded:: 5.2
 
 The :class:`~django.contrib.postgres.fields.UUID4Field` class is a subclass of Django's :class:`~django.db.models.UUIDField` that uses PostgreSQL's native ``gen_random_uuid()`` function to generate UUID v4 values. This is done by setting the ``db_default`` parameter to :class:`~django.contrib.postgres.functions.RandomUUID`.
 
@@ -957,7 +957,7 @@ Example usage:
 
 .. class:: UUID4AutoField(**options)
 
-.. versionadded:: 6.0
+.. versionadded:: 5.2
 
 :class:`~django.contrib.postgres.fields.UUID4AutoField` is an extension of :class:`~django.contrib.postgres.fields.UUID4Field`. Both can be used as a primary key, but only :class:`~django.contrib.postgres.fields.UUID4AutoField` can
 be specified per app in :attr:`AppConfig.default_auto_field<django.apps.AppConfig.default_auto_field>` or globally in the :setting:`DEFAULT_AUTO_FIELD` setting, making it a drop-in replacement for the default primary key field type.
