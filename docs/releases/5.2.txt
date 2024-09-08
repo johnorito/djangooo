@@ -218,8 +218,7 @@ Models
   behavior from the underlying data type. This allows creating
   auto-incrementing primary keys of any data type, such as UUID fields,
   without being limited to integer-based primary keys with `AutoField`.
-  Models can now subclass `AutoFieldMixin` and the desired field type to
-  define custom auto-generated primary keys.
+
 
 Requests and Responses
 ~~~~~~~~~~~~~~~~~~~~~~
