@@ -23,6 +23,7 @@ from django.db.models.constants import LOOKUP_SEP
 from django.db.models.expressions import (
     BaseExpression,
     Col,
+    ColPairs,
     Exists,
     F,
     OuterRef,
@@ -32,7 +33,6 @@ from django.db.models.expressions import (
     Value,
 )
 from django.db.models.fields import Field
-from django.db.models.fields.related_lookups import MultiColSource
 from django.db.models.lookups import Lookup
 from django.db.models.query_utils import (
     Q,
@@ -491,6 +491,11 @@ class Query(BaseExpression):
             )
             or having
         )
+        set_returning_annotations = {
+            alias
+            for alias, annotation in self.annotation_select.items()
+            if getattr(annotation, "set_returning", False)
+        }
         # Decide if we need to use a subquery.
         #
         # Existing aggregations would cause incorrect results as
@@ -510,6 +515,7 @@ class Query(BaseExpression):
             or qualify
             or self.distinct
             or self.combinator
+            or set_returning_annotations
         ):
             from django.db.models.sql.subqueries import AggregateQuery
 
@@ -551,6 +557,9 @@ class Query(BaseExpression):
                         if annotation.get_group_by_cols():
                             annotation_mask.add(annotation_alias)
                     inner_query.set_annotation_mask(annotation_mask)
+                    # Annotations that possibly return multiple rows cannot
+                    # be masked as they might have an incidence on the query.
+                    annotation_mask |= set_returning_annotations
 
             # Add aggregates to the outer AggregateQuery. This requires making
             # sure all columns referenced by the aggregates are selected in the
@@ -650,13 +659,13 @@ class Query(BaseExpression):
                 for combined_query in q.combined_queries
             )
         q.clear_ordering(force=True)
-        if limit:
+        if limit is True:
             q.set_limits(high=1)
         q.add_annotation(Value(1), "a")
         return q
 
     def has_results(self, using):
-        q = self.exists(using)
+        q = self.exists()
         compiler = q.get_compiler(using=using)
         return compiler.has_results()
 
@@ -1367,7 +1376,7 @@ class Query(BaseExpression):
         # __exact is the default lookup if one isn't given.
         *transforms, lookup_name = lookups or ["exact"]
         for name in transforms:
-            lhs = self.try_transform(lhs, name)
+            lhs = self.try_transform(lhs, name, lookups)
         # First try get_lookup() so that the lookup takes precedence if the lhs
         # supports both transform and lookup for the name.
         lookup_class = lhs.get_lookup(lookup_name)
@@ -1401,7 +1410,7 @@ class Query(BaseExpression):
 
         return lookup
 
-    def try_transform(self, lhs, name):
+    def try_transform(self, lhs, name, lookups=None):
         """
         Helper method for build_lookup(). Try to fetch and initialize
         a transform for name parameter from lhs.
@@ -1418,9 +1427,14 @@ class Query(BaseExpression):
                 suggestion = ", perhaps you meant %s?" % " or ".join(suggested_lookups)
             else:
                 suggestion = "."
+            if lookups is not None:
+                name_index = lookups.index(name)
+                unsupported_lookup = LOOKUP_SEP.join(lookups[name_index:])
+            else:
+                unsupported_lookup = name
             raise FieldError(
                 "Unsupported lookup '%s' for %s or join on the field not "
-                "permitted%s" % (name, output_field.__name__, suggestion)
+                "permitted%s" % (unsupported_lookup, output_field.__name__, suggestion)
             )
 
     def build_filter(
@@ -1544,9 +1558,7 @@ class Query(BaseExpression):
             if len(targets) == 1:
                 col = self._get_col(targets[0], join_info.final_field, alias)
             else:
-                col = MultiColSource(
-                    alias, targets, join_info.targets, join_info.final_field
-                )
+                col = ColPairs(alias, targets, join_info.targets, join_info.final_field)
         else:
             col = self._get_col(targets[0], join_info.final_field, alias)
 
@@ -2458,6 +2470,8 @@ class Query(BaseExpression):
 
         selected = {}
         if fields:
+            for field in fields:
+                self.check_alias(field)
             field_names = []
             extra_names = []
             annotation_names = []

@@ -1026,7 +1026,9 @@ class ModelAdmin(BaseModelAdmin):
         """
         attrs = {
             "class": "action-select",
-            "aria-label": format_html(_("Select this object for an action - {}"), obj),
+            "aria-label": format_html(
+                _("Select this object for an action - {}"), str(obj)
+            ),
         }
         checkbox = forms.CheckboxInput(attrs, lambda value: False)
         return checkbox.render(helpers.ACTION_CHECKBOX_NAME, str(obj.pk))
@@ -2227,7 +2229,7 @@ class ModelAdmin(BaseModelAdmin):
         if perms_needed or protected:
             title = _("Cannot delete %(name)s") % {"name": object_name}
         else:
-            title = _("Are you sure?")
+            title = _("Delete")
 
         context = {
             **self.admin_site.each_context(request),

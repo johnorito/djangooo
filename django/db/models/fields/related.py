@@ -187,7 +187,9 @@ class RelatedField(FieldCacheMixin, Field):
         return errors
 
     def _check_relation_model_exists(self):
-        rel_is_missing = self.remote_field.model not in self.opts.apps.get_models()
+        rel_is_missing = self.remote_field.model not in self.opts.apps.get_models(
+            include_auto_created=True
+        )
         rel_is_string = isinstance(self.remote_field.model, str)
         model_name = (
             self.remote_field.model
@@ -779,6 +781,7 @@ class ForeignObject(RelatedField):
             "ForeignObject.get_joining_columns() is deprecated. Use "
             "get_joining_fields() instead.",
             RemovedInDjango60Warning,
+            stacklevel=2,
         )
         source = self.reverse_related_fields if reverse_join else self.related_fields
         return tuple(
@@ -790,6 +793,7 @@ class ForeignObject(RelatedField):
             "ForeignObject.get_reverse_joining_columns() is deprecated. Use "
             "get_reverse_joining_fields() instead.",
             RemovedInDjango60Warning,
+            stacklevel=2,
         )
         return self.get_joining_columns(reverse_join=True)
 

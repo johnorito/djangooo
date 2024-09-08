@@ -191,7 +191,7 @@ class SafeMIMEMultipart(MIMEMixin, MIMEMultipart):
         MIMEMultipart.__setitem__(self, name, val)
 
 
-Alternative = namedtuple("Alternative", ["content", "mimetype"])
+EmailAlternative = namedtuple("Alternative", ["content", "mimetype"])
 EmailAttachment = namedtuple("Attachment", ["filename", "content", "mimetype"])
 
 
@@ -286,7 +286,8 @@ class EmailMessage:
             # Use cached DNS_NAME for performance
             msg["Message-ID"] = make_msgid(domain=DNS_NAME)
         for name, value in self.extra_headers.items():
-            if name.lower() != "from":  # From is already handled
+            # Avoid headers handled above.
+            if name.lower() not in {"from", "to", "cc", "reply-to"}:
                 msg[name] = value
         return msg
 
@@ -427,14 +428,13 @@ class EmailMessage:
     def _set_list_header_if_not_empty(self, msg, header, values):
         """
         Set msg's header, either from self.extra_headers, if present, or from
-        the values argument.
+        the values argument if not empty.
         """
-        if values:
-            try:
-                value = self.extra_headers[header]
-            except KeyError:
-                value = ", ".join(str(v) for v in values)
-            msg[header] = value
+        try:
+            msg[header] = self.extra_headers[header]
+        except KeyError:
+            if values:
+                msg[header] = ", ".join(str(v) for v in values)
 
 
 class EmailMultiAlternatives(EmailMessage):
@@ -477,14 +477,14 @@ class EmailMultiAlternatives(EmailMessage):
             reply_to,
         )
         self.alternatives = [
-            Alternative(*alternative) for alternative in (alternatives or [])
+            EmailAlternative(*alternative) for alternative in (alternatives or [])
         ]
 
     def attach_alternative(self, content, mimetype):
         """Attach an alternative content representation."""
         if content is None or mimetype is None:
             raise ValueError("Both content and mimetype must be provided.")
-        self.alternatives.append(Alternative(content, mimetype))
+        self.alternatives.append(EmailAlternative(content, mimetype))
 
     def _create_message(self, msg):
         return self._create_attachments(self._create_alternatives(msg))

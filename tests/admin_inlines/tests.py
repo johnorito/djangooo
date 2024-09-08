@@ -1768,6 +1768,13 @@ class TestInlineWithFieldsets(TestDataMixin, TestCase):
     def setUp(self):
         self.client.force_login(self.superuser)
 
+    @override_settings(DEBUG=True)
+    def test_fieldset_context_fully_set(self):
+        url = reverse("admin:admin_inlines_photographer_add")
+        with self.assertRaisesMessage(AssertionError, "no logs"):
+            with self.assertLogs("django.template", "DEBUG"):
+                self.client.get(url)
+
     def test_inline_headings(self):
         response = self.client.get(reverse("admin:admin_inlines_photographer_add"))
         # Page main title.
@@ -2422,3 +2429,39 @@ class SeleniumTests(AdminSeleniumTestCase):
                 )
                 self.assertEqual(available.text, "AVAILABLE ATTENDANT")
                 self.assertEqual(chosen.text, "CHOSEN ATTENDANT")
+
+    def test_tabular_inline_layout(self):
+        from selenium.webdriver.common.by import By
+
+        self.admin_login(username="super", password="secret")
+        self.selenium.get(
+            self.live_server_url + reverse("admin:admin_inlines_photographer_add")
+        )
+        tabular_inline = self.selenium.find_element(
+            By.CSS_SELECTOR, "[data-inline-type='tabular']"
+        )
+        headers = tabular_inline.find_elements(By.TAG_NAME, "th")
+        self.assertEqual(
+            [h.get_attribute("innerText") for h in headers],
+            [
+                "",
+                "IMAGE",
+                "TITLE",
+                "DESCRIPTION",
+                "CREATION DATE",
+                "UPDATE DATE",
+                "UPDATED BY",
+                "DELETE?",
+            ],
+        )
+        # There are no fieldset section names rendered.
+        self.assertNotIn("Details", tabular_inline.text)
+        # There are no fieldset section descriptions rendered.
+        self.assertNotIn("First group", tabular_inline.text)
+        self.assertNotIn("Second group", tabular_inline.text)
+        self.assertNotIn("Third group", tabular_inline.text)
+        # There are no fieldset classes applied.
+        self.assertEqual(
+            tabular_inline.find_elements(By.CSS_SELECTOR, ".collapse"),
+            [],
+        )
