@@ -12,9 +12,6 @@ class UUID4Field(UUIDField):
     def get_internal_type(self):
         return "UUID4Field"
 
-    def rel_db_type(self, connection):
-        return UUIDField().db_type(connection=connection)
-
 
 class UUID4AutoField(AutoFieldMixin, UUID4Field):
     def get_internal_type(self):
