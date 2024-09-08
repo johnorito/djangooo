@@ -231,10 +231,10 @@ Models
 * Added support for validation of model constraints which use a
   :class:`~django.db.models.GeneratedField`.
 
-* Introduced `AutoFieldMixin` to decouple the automatic primary key generation
+* Introduced ``AutoFieldMixin` to decouple the automatic primary key generation
   behavior from the underlying data type. This allows creating
   auto-incrementing primary keys of any data type, such as UUID fields,
-  without being limited to integer-based primary keys with `AutoField`.
+  without being limited to integer-based primary keys with ``AutoField``.
 
 * The new :attr:`.Expression.set_returning` attribute specifies that the
   expression contains a set-returning function, enforcing subquery evaluation.
