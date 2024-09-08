@@ -219,7 +219,6 @@ Models
   auto-incrementing primary keys of any data type, such as UUID fields,
   without being limited to integer-based primary keys with `AutoField`.
 
-
 Requests and Responses
 ~~~~~~~~~~~~~~~~~~~~~~
 
