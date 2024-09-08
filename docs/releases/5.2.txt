@@ -73,6 +73,7 @@ Minor features
 * Added :class:`~django.contrib.postgres.fields.UUID4Field`, a new field that
   automatically generates a UUID4 value in the database without requiring
   explicit value assignment in Python code.
+
 * Added :class:`~django.contrib.postgres.fields.UUID4AutoField`, a new field
   that can be used as a primary key field that automatically generates
   UUID4 values in the database for new model instances.
@@ -226,15 +227,15 @@ Models
   of a set of counterintuitive rules which made query combination through
   methods such as
   :meth:`QuerySet.union()<django.db.models.query.QuerySet.union>` unpredictable.
-  
+
 * Added support for validation of model constraints which use a
   :class:`~django.db.models.GeneratedField`.
-  
+
 * Introduced `AutoFieldMixin` to decouple the automatic primary key generation
   behavior from the underlying data type. This allows creating
   auto-incrementing primary keys of any data type, such as UUID fields,
   without being limited to integer-based primary keys with `AutoField`.
-  
+
 * The new :attr:`.Expression.set_returning` attribute specifies that the
   expression contains a set-returning function, enforcing subquery evaluation.
   This is necessary for many Postgres set-returning functions.
