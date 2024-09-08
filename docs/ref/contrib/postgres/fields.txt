@@ -938,8 +938,6 @@ Django includes two PostgreSQL-specific UUID field types for working with UUIDs:
 The :class:`~django.contrib.postgres.fields.UUID4Field` class is a subclass of Django's :class:`~django.db.models.UUIDField` that uses PostgreSQL's native ``gen_random_uuid()`` function to generate UUID v4 values. This is done by setting the ``db_default`` parameter to :class:`~django.contrib.postgres.functions.RandomUUID`.
 
 This field is particularly useful when you want the database to handle the generation of UUIDs, decreasing the risk of collisions. It's worth mentioning that using database generated UUID v4 **does not guarantee uniqueness**, but `the risk of a collision is extremely low`_.
-
-
 Example usage:
 
 .. code-block:: python
