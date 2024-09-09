@@ -2,9 +2,13 @@ import os
 import select
 import sys
 import traceback
+from datetime import date, datetime, timedelta
 
 from django.apps import apps
+from django.conf import settings
 from django.core.management import BaseCommand, CommandError
+from django.db import models, transaction
+from django.db.models import functions
 from django.utils.datastructures import OrderedSet
 
 
@@ -17,6 +21,15 @@ class Command(BaseCommand):
 
     requires_system_checks = []
     shells = ["ipython", "bpython", "python"]
+    default_namespace = {
+        "date": date,
+        "datetime": datetime,
+        "timedelta": timedelta,
+        "models": models,
+        "functions": functions,
+        "transaction": transaction,
+        "settings": settings,
+    }
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -150,6 +163,8 @@ class Command(BaseCommand):
             if app.models_module is not None
         ]
         namespace = {}
+        for label in self.default_namespace:
+            namespace[label] = self.default_namespace[label]
         for model in reversed(apps_models):
             if model.__module__:
                 namespace[model.__name__] = model

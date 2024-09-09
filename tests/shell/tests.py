@@ -1,15 +1,18 @@
 import sys
 import unittest
+from datetime import date, datetime, timedelta
 from unittest import mock
 
 from django import __version__
+from django.conf import settings
 from django.contrib.auth import models as auth_model_module
 from django.contrib.auth.models import Group, Permission, User
 from django.contrib.contenttypes import models as contenttypes_model_module
 from django.contrib.contenttypes.models import ContentType
 from django.core.management import CommandError, call_command
 from django.core.management.commands import shell
-from django.db import models
+from django.db import models, transaction
+from django.db.models import functions
 from django.test import SimpleTestCase
 from django.test.utils import (
     captured_stdin,
@@ -154,6 +157,13 @@ class ShellCommandTestCase(SimpleTestCase):
         self.assertEqual(
             namespace,
             {
+                "date": date,
+                "datetime": datetime,
+                "timedelta": timedelta,
+                "models": models,
+                "functions": functions,
+                "transaction": transaction,
+                "settings": settings,
                 "Marker": shell_models.Marker,
                 "Phone": shell_models.Phone,
                 "ContentType": ContentType,
@@ -208,6 +218,13 @@ class ShellCommandTestCase(SimpleTestCase):
         self.assertEqual(
             namespace,
             {
+                "date": date,
+                "datetime": datetime,
+                "timedelta": timedelta,
+                "models": models,
+                "functions": functions,
+                "transaction": transaction,
+                "settings": settings,
                 "resolve": resolve,
                 "reverse": reverse,
                 "Marker": shell_models.Marker,
@@ -229,7 +246,7 @@ class ShellCommandTestCase(SimpleTestCase):
         with captured_stdout() as stdout:
             cmd = shell.Command()
             cmd.get_and_report_namespace(verbosity=1)
-        self.assertEqual(stdout.getvalue().strip(), "9 objects imported automatically")
+        self.assertEqual(stdout.getvalue().strip(), "16 objects imported automatically")
 
     @override_settings(
         INSTALLED_APPS=["shell", "django.contrib.auth", "django.contrib.contenttypes"]
@@ -258,6 +275,7 @@ class ShellCommandTestCase(SimpleTestCase):
 
         self.assertEqual(
             stdout.getvalue().strip(),
+            "from datetime import date, datetime, timedelta\n"
             "from django.contrib.contenttypes.models import ContentType\n"
             "from shell.models import Phone, Marker",
         )
