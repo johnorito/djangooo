@@ -221,9 +221,21 @@ class JSONArrayAgg(Aggregate):
     arity = 1
 
     def as_sqlite(self, compiler, connection, **extra_context):
-        return super().as_sql(
+        sql, params = self.as_sql(
             compiler, connection, function="JSON_GROUP_ARRAY", **extra_context
         )
+        if (default := self.default) == []:
+            return sql, params
+        count = self.copy()
+        count.__class__ = Count
+        count_sql, count_params = compiler.compile(count)
+        default_sql = ""
+        default_params = () if self.filter is not None else []
+        if default is not None:
+            default_sql, default_params = compiler.compile(default)
+            default_sql = f" ELSE {default_sql}"
+        sql = f"(CASE WHEN {count_sql} > 0 THEN {sql}{default_sql} END)"
+        return sql, count_params + params + default_params
 
     def as_postgresql(self, compiler, connection, **extra_context):
         if not connection.features.is_postgresql_16:

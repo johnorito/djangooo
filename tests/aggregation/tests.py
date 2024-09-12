@@ -2207,10 +2207,8 @@ class AggregateTestCase(TestCase):
         Author.objects.all().delete()
 
         val = Author.objects.aggregate(jsonarrayagg=JSONArrayAgg("age"))
-        if connection.vendor == "sqlite":
-            self.assertEqual(val, {"jsonarrayagg": []})
-        else:
-            self.assertEqual(val, {"jsonarrayagg": None})
+
+        self.assertEqual(val, {"jsonarrayagg": None})
 
     def test_JSONArrayAgg_default_set(self):
         Author.objects.all().delete()
@@ -2218,10 +2216,7 @@ class AggregateTestCase(TestCase):
         val = Author.objects.aggregate(
             jsonarrayagg=JSONArrayAgg("name", default=["<empty>"])
         )
-        if connection.vendor == "sqlite":
-            self.assertEqual(val, {"jsonarrayagg": []})
-        else:
-            self.assertEqual(val, {"jsonarrayagg": ["<empty>"]})
+        self.assertEqual(val, {"jsonarrayagg": ["<empty>"]})
 
     def test_JSONArrayAgg_distinct_false(self):
         val = Author.objects.aggregate(jsonarrayagg=JSONArrayAgg("age", distinct=False))
