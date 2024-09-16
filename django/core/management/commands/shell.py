@@ -7,7 +7,7 @@ from datetime import date, datetime, timedelta
 from django.apps import apps
 from django.conf import settings
 from django.core.management import BaseCommand, CommandError
-from django.db import models, transaction
+from django.db import models
 from django.db.models import functions
 from django.utils.datastructures import OrderedSet
 
@@ -27,7 +27,6 @@ class Command(BaseCommand):
         "timedelta": timedelta,
         "models": models,
         "functions": functions,
-        "transaction": transaction,
         "settings": settings,
     }
 

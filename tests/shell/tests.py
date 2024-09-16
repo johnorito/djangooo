@@ -11,7 +11,7 @@ from django.contrib.contenttypes import models as contenttypes_model_module
 from django.contrib.contenttypes.models import ContentType
 from django.core.management import CommandError, call_command
 from django.core.management.commands import shell
-from django.db import models, transaction
+from django.db import models
 from django.db.models import functions
 from django.test import SimpleTestCase
 from django.test.utils import (
@@ -162,7 +162,6 @@ class ShellCommandTestCase(SimpleTestCase):
                 "timedelta": timedelta,
                 "models": models,
                 "functions": functions,
-                "transaction": transaction,
                 "settings": settings,
                 "Marker": shell_models.Marker,
                 "Phone": shell_models.Phone,
@@ -223,7 +222,6 @@ class ShellCommandTestCase(SimpleTestCase):
                 "timedelta": timedelta,
                 "models": models,
                 "functions": functions,
-                "transaction": transaction,
                 "settings": settings,
                 "resolve": resolve,
                 "reverse": reverse,
@@ -246,7 +244,7 @@ class ShellCommandTestCase(SimpleTestCase):
         with captured_stdout() as stdout:
             cmd = shell.Command()
             cmd.get_and_report_namespace(verbosity=1)
-        self.assertEqual(stdout.getvalue().strip(), "16 objects imported automatically")
+        self.assertEqual(stdout.getvalue().strip(), "15 objects imported automatically")
 
     @override_settings(
         INSTALLED_APPS=["shell", "django.contrib.auth", "django.contrib.contenttypes"]
