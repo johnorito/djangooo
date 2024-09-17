@@ -34,9 +34,10 @@ command, override its ``get_namespace()`` method. For example:
             }
 
 The above customization adds :func:`~django.urls.resolve` and
-:func:`~django.urls.reverse` to the default namespace, which includes all
-models from all apps. These two functions will then be available when the
-shell opens, without a manual import statement.
+:func:`~django.urls.reverse` to the default namespace, which includes all models
+from all apps and other utilities (see the :djadmin:`shell` documentation for
+more details about default imports). These two functions will then be available
+when the shell opens, without a manual import statement.
 
 If you prefer to not have models automatically imported, create a custom
 ``get_namespace()`` that excludes the ``super().get_namespace()`` call:

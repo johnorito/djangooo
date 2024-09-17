@@ -1065,7 +1065,16 @@ Mails the email addresses specified in :setting:`ADMINS` using
 
 Starts the Python interactive interpreter.
 
-All models from all installed apps are automatically imported. See the guide on
+All models from all installed apps are automatically imported. Furthermore, a
+set of default automatic imports to assist making queries, to change your
+project's settings and check datetime were added:
+
+* ``from datetime import date, datetime, timezone``
+* ``from django.db.models import *``
+* ``from django.db.models.functions import *``
+* ``from django.conf import settings``
+
+See the guide on
 :ref:`customizing this behaviour <customizing-shell-auto-imports>` to add or
 remove imports.
 
