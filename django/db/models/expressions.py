@@ -1342,6 +1342,10 @@ class ColPairs(Expression):
     def __iter__(self):
         return iter(self.get_cols())
 
+    def __repr__(self):
+        cols = ", ".join(repr(col) for col in self.get_cols())
+        return "{}({})".format(self.__class__.__name__, cols)
+
     def get_cols(self):
         return [
             Col(self.alias, target, source)

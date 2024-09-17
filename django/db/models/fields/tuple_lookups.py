@@ -1,7 +1,7 @@
 import itertools
 
 from django.core.exceptions import EmptyResultSet
-from django.db.models.expressions import Func, Value
+from django.db.models.expressions import ColPairs, Func, Value
 from django.db.models.lookups import (
     Exact,
     GreaterThan,
@@ -11,6 +11,7 @@ from django.db.models.lookups import (
     LessThan,
     LessThanOrEqual,
 )
+from django.db.models.sql import Query
 from django.db.models.sql.where import AND, OR, WhereNode
 
 
@@ -24,7 +25,15 @@ class TupleLookupMixin:
         return super().get_prep_lookup()
 
     def check_tuple_lookup(self):
+        self.check_rhs_is_tuple_or_list()
         self.check_rhs_length_equals_lhs_length()
+
+    def check_rhs_is_tuple_or_list(self):
+        if not isinstance(self.rhs, (tuple, list)):
+            raise ValueError(
+                f"'{self.lookup_name}' lookup of '{self.lhs.field.name}' field "
+                "must be a tuple or a list"
+            )
 
     def check_rhs_length_equals_lhs_length(self):
         len_lhs = len(self.lhs)
@@ -32,6 +41,25 @@ class TupleLookupMixin:
             raise ValueError(
                 f"'{self.lookup_name}' lookup of '{self.lhs.field.name}' field "
                 f"must have {len_lhs} elements"
+            )
+
+    def check_rhs_elements_length_equals_lhs_length(self):
+        if not all(len(self.lhs) == len(vals) for vals in self.rhs):
+            raise ValueError(
+                f"'{self.lookup_name}' lookup of '{self.lhs.field.name}' field "
+                f"must have {len(self.lhs)} elements each"
+            )
+
+    def check_rhs_is_query(self):
+        if not (
+            isinstance(self.rhs, Query)
+            and len(self.rhs.select) == 1
+            and isinstance(self.rhs.select[0], ColPairs)
+            and len(self.rhs.select[0]) == len(self.lhs)
+        ):
+            raise ValueError(
+                "The subquery is expected to be a query object "
+                "consisting of the same fields."
             )
 
     def as_sql(self, compiler, connection):
@@ -182,7 +210,24 @@ class TupleLessThanOrEqual(TupleLookupMixin, LessThanOrEqual):
 
 class TupleIn(TupleLookupMixin, In):
     def check_tuple_lookup(self):
-        self.check_rhs_elements_length_equals_lhs_length()
+        if self.rhs_is_direct_value():
+            self.check_rhs_is_tuple_or_list()
+            self.check_rhs_is_collection_of_tuples_or_lists()
+            self.check_rhs_elements_length_equals_lhs_length()
+        else:
+            self.check_rhs_is_query()
+
+    def as_subquery(self, compiler, connection):
+        assert connection.features.supports_tuple_in_subquery
+        self.rhs.set_values([source.name for source in self.lhs.sources])
+        return compiler.compile(In(Tuple(self.lhs), self.rhs))
+
+    def check_rhs_is_collection_of_tuples_or_lists(self):
+        if not all(isinstance(vals, (tuple, list)) for vals in self.rhs):
+            raise ValueError(
+                f"'{self.lookup_name}' lookup of '{self.lhs.field.name}' field "
+                f"must be a collection of tuples or lists"
+            )
 
     def check_rhs_elements_length_equals_lhs_length(self):
         len_lhs = len(self.lhs)
@@ -195,6 +240,8 @@ class TupleIn(TupleLookupMixin, In):
     def as_sql(self, compiler, connection):
         if not self.rhs:
             raise EmptyResultSet
+        if not self.rhs_is_direct_value():
+            return self.as_subquery(compiler, connection)
 
         # e.g.: (a, b, c) in [(x1, y1, z1), (x2, y2, z2)] as SQL:
         # WHERE (a, b, c) IN ((x1, y1, z1), (x2, y2, z2))
@@ -215,6 +262,8 @@ class TupleIn(TupleLookupMixin, In):
     def as_sqlite(self, compiler, connection):
         if not self.rhs:
             raise EmptyResultSet
+        if not self.rhs_is_direct_value():
+            return self.as_subquery(compiler, connection)
 
         # e.g.: (a, b, c) in [(x1, y1, z1), (x2, y2, z2)] as SQL:
         # WHERE (a = x1 AND b = y1 AND c = z1) OR (a = x2 AND b = y2 AND c = z2)
