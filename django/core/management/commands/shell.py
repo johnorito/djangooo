@@ -137,20 +137,33 @@ class Command(BaseCommand):
             )
         elif verbosity >= 2:
             imports_by_module = {}
+            imports_by_alias = {}
             for obj_name, obj in namespace.items():
-                if (
-                    hasattr(obj, "__module__")
-                    and hasattr(obj, "__qualname__")
-                    and obj.__qualname__.find(".") == -1
+                if hasattr(obj, "__module__") and (
+                    (hasattr(obj, "__qualname__") and obj.__qualname__.find(".") == -1)
+                    or not hasattr(obj, "__qualname__")
                 ):
                     module = obj.__module__
                     collected_imports = imports_by_module.get(module, [])
                     imports_by_module[module] = collected_imports + [obj_name]
+                if not hasattr(obj, "__module__"):
+                    tokens = obj.__name__.split(".")
+                    if obj_name in tokens:
+                        tokens.remove(obj_name)
+                        module = ".".join(tokens)
+                        collected_imports = imports_by_module.get(module, [])
+                        imports_by_module[module] = collected_imports + [obj_name]
+                    else:
+                        module = ".".join(tokens)
+                        imports_by_alias[module] = obj_name
+
             for module, imported_objects in imports_by_module.items():
                 self.stdout.write(
                     f"from {module} import {', '.join(imported_objects)}",
                     self.style.SUCCESS,
                 )
+            for module, alias in imports_by_alias.items():
+                self.stdout.write(f"import {module} as {alias}", self.style.SUCCESS)
 
         return namespace
 

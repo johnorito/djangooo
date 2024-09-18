@@ -201,8 +201,7 @@ Management Commands
   ``"true"``.
   
 * The :djadmin:`shell` management command now automatically imports all models
-  from all installed apps and other default imports (see the :djadmin:`shell`
-  documentation for more details about default imports). :ref:`Customize this
+  from all installed apps and other default imports. :ref:`Customize this
   behavior <customizing-shell-auto-imports>` to add extra imports or remove the
   new defaults.
 

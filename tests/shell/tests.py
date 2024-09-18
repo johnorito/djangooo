@@ -274,8 +274,13 @@ class ShellCommandTestCase(SimpleTestCase):
         self.assertEqual(
             stdout.getvalue().strip(),
             "from datetime import date, datetime, timedelta\n"
+            "from django.db import models\n"
+            "from django.db.models import functions\n"
+            "from django.conf import settings\n"
             "from django.contrib.contenttypes.models import ContentType\n"
-            "from shell.models import Phone, Marker",
+            "from shell.models import Phone, Marker\n"
+            "import shell.models as shell_models\n"
+            "import django.contrib.contenttypes.models as contenttypes_models",
         )
 
     @override_settings(
