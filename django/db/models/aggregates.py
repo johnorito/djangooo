@@ -218,6 +218,7 @@ class Variance(NumericOutputFieldMixin, Aggregate):
 class JSONArrayAgg(Aggregate):
     function = "JSON_ARRAYAGG"
     output_field = JSONField()
+    name = "JSONArrayAgg"
     arity = 1
 
     def as_sqlite(self, compiler, connection, **extra_context):
