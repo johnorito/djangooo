@@ -4056,8 +4056,8 @@ by the aggregate.
     containing those JSON values.
 
     * Default alias: ``<field>__JSONArrayAgg``
-    * Return type: JSON ``array`` containing an array element for each value in a
-      set of JSON or SQL values.
+    * Return type: JSON ``array`` containing an array element for each value
+      in a set of JSON or SQL values.
 
 Query-related tools
 ===================
