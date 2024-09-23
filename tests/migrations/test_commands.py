@@ -2926,9 +2926,7 @@ class SquashMigrationsTests(MigrationTestBase):
             )
 
             migration_plan = re.findall("migrations.(.+)\n", out.getvalue())
-            self.assertEqual(
-                migration_plan, ["0001_double_squash", "6_auto", "7_auto"]
-            )
+            self.assertEqual(migration_plan, ["0001_double_squash", "6_auto", "7_auto"])
 
     def test_squashmigrations_initial_attribute(self):
         with self.temporary_migration_module(
