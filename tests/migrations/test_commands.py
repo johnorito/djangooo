@@ -2907,7 +2907,7 @@ class SquashMigrationsTests(MigrationTestBase):
 
             loader = MigrationLoader(connection)
             migration = loader.disk_migrations[("migrations", "0001_double_squash")]
-            self.assertEquals(
+            self.assertEqual(
                 migration.replaces,
                 [
                     ("migrations", "1_auto"),
@@ -2926,7 +2926,7 @@ class SquashMigrationsTests(MigrationTestBase):
             )
 
             migration_plan = re.findall("migrations.(.+)\n", out.getvalue())
-            self.assertEquals(
+            self.assertEqual(
                 migration_plan, ["0001_double_squash", "6_auto", "7_auto"]
             )
 
