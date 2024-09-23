@@ -74,9 +74,7 @@ class Command(BaseCommand):
             raise CommandError(str(err))
         # Load the current graph state, check the app and migration they asked
         # for exists.
-        loader = MigrationLoader(
-            connections[DEFAULT_DB_ALIAS],
-            replace_migrations=False)
+        loader = MigrationLoader(connections[DEFAULT_DB_ALIAS], replace_migrations=False)
         if app_label not in loader.migrated_apps:
             raise CommandError(
                 "App '%s' does not have migrations (so squashmigrations on "
