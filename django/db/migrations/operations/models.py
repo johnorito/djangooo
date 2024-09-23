@@ -1291,23 +1291,10 @@ class AlterConstraint(IndexOperation):
         )
 
     def database_forwards(self, app_label, schema_editor, from_state, to_state):
-        to_model = to_state.apps.get_model(app_label, self.model_name)
-        if self.allow_migrate_model(schema_editor.connection.alias, to_model):
-            from_model = from_state.apps.get_model(app_label, self.model_name)
-            from_constraint = [
-                constraint
-                for constraint in from_model._meta.constraints
-                if constraint.name == self.name
-            ][0]
-            to_constraint = [
-                constraint
-                for constraint in to_model._meta.constraints
-                if constraint.name == self.name
-            ][0]
-            schema_editor.alter_constraint(to_model, from_constraint, to_constraint)
+        pass
 
     def database_backwards(self, app_label, schema_editor, from_state, to_state):
-        self.database_forwards(app_label, schema_editor, from_state, to_state)
+        pass
 
     def deconstruct(self):
         return (

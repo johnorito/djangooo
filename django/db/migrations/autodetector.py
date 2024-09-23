@@ -1451,6 +1451,19 @@ class MigrationAutodetector:
                     ),
                 )
 
+    def _constraint_should_be_dropped_and_recreated(
+        self, old_constraint, new_constraint
+    ):
+        old_path, old_args, old_kwargs = old_constraint.deconstruct()
+        new_path, new_args, new_kwargs = new_constraint.deconstruct()
+
+        for attr in old_constraint.non_db_attrs:
+            old_kwargs.pop(attr, None)
+        for attr in new_constraint.non_db_attrs:
+            new_kwargs.pop(attr, None)
+
+        return (old_path, old_args, old_kwargs) != (new_path, new_args, new_kwargs)
+
     def create_altered_constraints(self):
         option_name = operations.AddConstraint.option_name
         for app_label, model_name in sorted(self.kept_model_keys):
@@ -1470,7 +1483,13 @@ class MigrationAutodetector:
                 for new_c in new_constraints:
                     old_c_dec = old_c.deconstruct()
                     new_c_dec = new_c.deconstruct()
-                    if old_c_dec != new_c_dec and old_c.name == new_c.name:
+                    if (
+                        old_c_dec != new_c_dec
+                        and old_c.name == new_c.name
+                        and not self._constraint_should_be_dropped_and_recreated(
+                            old_c, new_c
+                        )
+                    ):
                         alt_constraints.append(new_c)
                         alt_constraints_name.append(new_c.name)
 
