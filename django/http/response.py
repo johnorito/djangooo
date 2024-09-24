@@ -646,6 +646,14 @@ class HttpResponsePermanentRedirect(HttpResponseRedirectBase):
     status_code = 301
 
 
+class HttpResponseTemporaryRedirectWithSameMethod(HttpResponseRedirectBase):
+    status_code = 307
+
+
+class HttpResponsePermanentRedirectWithSameMethod(HttpResponseRedirectBase):
+    status_code = 308
+
+
 class HttpResponseNotModified(HttpResponse):
     status_code = 304
 
