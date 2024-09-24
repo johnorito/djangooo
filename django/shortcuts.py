@@ -8,7 +8,9 @@ from django.http import (
     Http404,
     HttpResponse,
     HttpResponsePermanentRedirect,
+    HttpResponsePermanentRedirectWithSameMethod,
     HttpResponseRedirect,
+    HttpResponseTemporaryRedirectWithSameMethod,
 )
 from django.template import loader
 from django.urls import NoReverseMatch, reverse
@@ -26,7 +28,7 @@ def render(
     return HttpResponse(content, content_type, status)
 
 
-def redirect(to, *args, permanent=False, **kwargs):
+def redirect(to, *args, permanent=False, preserve_method=False, **kwargs):
     """
     Return an HttpResponseRedirect to the appropriate URL for the arguments
     passed.
@@ -41,11 +43,20 @@ def redirect(to, *args, permanent=False, **kwargs):
         * A URL, which will be used as-is for the redirect location.
 
     Issues a temporary redirect by default; pass permanent=True to issue a
-    permanent redirect.
+    permanent redirect. Pass preserve_method=True to issue a redirect tha must
+    preserve HTTP verb.
     """
-    redirect_class = (
-        HttpResponsePermanentRedirect if permanent else HttpResponseRedirect
-    )
+
+    match (preserve_method, permanent):
+        case False, False:
+            redirect_class = HttpResponseRedirect
+        case False, True:
+            redirect_class = HttpResponsePermanentRedirect
+        case True, False:
+            redirect_class = HttpResponseTemporaryRedirectWithSameMethod
+        case True, False:
+            redirect_class = HttpResponsePermanentRedirectWithSameMethod
+
     return redirect_class(resolve_url(to, *args, **kwargs))
 
 
