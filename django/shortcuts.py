@@ -47,15 +47,14 @@ def redirect(to, *args, permanent=False, preserve_method=False, **kwargs):
     preserve HTTP verb.
     """
 
-    match (preserve_method, permanent):
-        case False, False:
-            redirect_class = HttpResponseRedirect
-        case False, True:
-            redirect_class = HttpResponsePermanentRedirect
-        case True, False:
-            redirect_class = HttpResponseTemporaryRedirectWithSameMethod
-        case True, False:
-            redirect_class = HttpResponsePermanentRedirectWithSameMethod
+    redirect_class = HttpResponseRedirect
+
+    if not preserve_method and permanent:
+        redirect_class = HttpResponsePermanentRedirect
+    if preserve_method and not permanent:
+        redirect_class = HttpResponseTemporaryRedirectWithSameMethod
+    if preserve_method and not permanent:
+        redirect_class = HttpResponsePermanentRedirectWithSameMethod
 
     return redirect_class(resolve_url(to, *args, **kwargs))
 
