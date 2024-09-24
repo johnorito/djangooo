@@ -311,7 +311,6 @@ Management Commands
 * The new :djadmin:`optimizemigration` command allows optimizing operations for
   a migration.
 
-
 Migrations
 ~~~~~~~~~~
 
@@ -330,8 +329,6 @@ Migrations
   ``AlterIndexTogether`` and ``AddIndex``, when moving indexes defined in the
   ``Meta.index_together`` to the
   :attr:`Meta.indexes <django.db.models.Options.indexes>`.
-* Squashed migrations can now themselves be squashed before being transitioned to
-  normal migrations.
 
 Models
 ~~~~~~
