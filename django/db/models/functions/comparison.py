@@ -155,10 +155,12 @@ class JSONArray(Func):
         return super().as_sql(compiler, connection, **extra_context)
 
     def as_native(self, compiler, connection, *, returning, **extra_context):
-        # By default, sqlite keeps any NULL values in the array.
-        # PostgresSQL and Oracle remove NULL values from the array by default, but
-        # we can change this behavior by adding the NULL ON NULL clause.
-        # This also matches the postgres behavior of jsonb_build_array.
+        """Modify JSON_ARRAY for Oracle and Postgres 16 and later.
+
+        Postgres and Oracle both remove SQL NULL values from the array by
+        default. Adds the NULL ON NULL clause to keep NULL values in the array,
+        mapping them to JSON null values, which matches the behavior of SQLite.
+        """
         null_on_null = "NULL ON NULL" if len(self.get_source_expressions()) > 0 else ""
 
         return self.as_sql(
