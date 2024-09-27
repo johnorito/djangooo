@@ -62,7 +62,11 @@ Minor features
 
 * :lookup:`coveredby` lookup is now supported on MySQL.
 
-* :lookup:`coveredby` lookup is now supported on MariaDB 11.7+.
+* :lookup:`coveredby` lookup,
+  :class:`~django.contrib.gis.db.models.Collect` aggregation, and
+  :class:`~django.contrib.gis.db.models.functions.GeoHash` and
+  :class:`~django.contrib.gis.db.models.functions.IsValid` database functions
+  are now supported on MariaDB 11.7+.
 
 :mod:`django.contrib.messages`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
