@@ -36,7 +36,7 @@ from . import tasks as test_tasks
 )
 class TaskTestCase(SimpleTestCase):
     def setUp(self):
-        default_task_backend.clear()  # type:ignore[attr-defined]
+        default_task_backend.clear()
 
     def test_using_correct_backend(self):
         self.assertEqual(default_task_backend, tasks["default"])
@@ -55,9 +55,7 @@ class TaskTestCase(SimpleTestCase):
         self.assertEqual(result.args, [])
         self.assertEqual(result.kwargs, {})
 
-        self.assertEqual(
-            default_task_backend.results, [result]
-        )  # type:ignore[attr-defined]
+        self.assertEqual(default_task_backend.results, [result])
 
     async def test_enqueue_task_async(self):
         result = await test_tasks.noop_task.aenqueue()
@@ -67,9 +65,7 @@ class TaskTestCase(SimpleTestCase):
         self.assertEqual(result.args, [])
         self.assertEqual(result.kwargs, {})
 
-        self.assertEqual(
-            default_task_backend.results, [result]
-        )  # type:ignore[attr-defined]
+        self.assertEqual(default_task_backend.results, [result])
 
     def test_using_priority(self):
         self.assertEqual(test_tasks.noop_task.priority, 0)
@@ -168,7 +164,7 @@ class TaskTestCase(SimpleTestCase):
             f"priority must be a whole number between {MIN_PRIORITY} and "
             f"{MAX_PRIORITY}",
         ):
-            test_tasks.noop_task.using(priority=3.1)  # type:ignore[arg-type]
+            test_tasks.noop_task.using(priority=3.1)
 
         test_tasks.noop_task.using(priority=100)
         test_tasks.noop_task.using(priority=-100)
@@ -224,7 +220,7 @@ class TaskTestCase(SimpleTestCase):
                     InvalidTaskError,
                     "Task function must be a globally importable function",
                 ):
-                    task()(invalid_function)  # type:ignore[arg-type]
+                    task()(invalid_function)
 
     def test_get_backend(self):
         self.assertEqual(test_tasks.noop_task.backend, "default")

@@ -15,7 +15,7 @@ from . import tasks as test_tasks
 )
 class DummyBackendTestCase(SimpleTestCase):
     def setUp(self):
-        default_task_backend.clear()  # type:ignore[attr-defined]
+        default_task_backend.clear()
 
     def test_using_correct_backend(self):
         self.assertEqual(default_task_backend, tasks["default"])
@@ -35,9 +35,7 @@ class DummyBackendTestCase(SimpleTestCase):
                 self.assertEqual(result.args, [1])
                 self.assertEqual(result.kwargs, {"two": 3})
 
-                self.assertIn(
-                    result, default_task_backend.results
-                )  # type:ignore[attr-defined]
+                self.assertIn(result, default_task_backend.results)
 
     async def test_enqueue_task_async(self):
         for task in [test_tasks.noop_task, test_tasks.noop_task_async]:
@@ -53,9 +51,7 @@ class DummyBackendTestCase(SimpleTestCase):
                 self.assertEqual(result.args, [])
                 self.assertEqual(result.kwargs, {})
 
-                self.assertIn(
-                    result, default_task_backend.results
-                )  # type:ignore[attr-defined]
+                self.assertIn(result, default_task_backend.results)
 
     def test_get_result(self):
         result = default_task_backend.enqueue(test_tasks.noop_task, (), {})
@@ -76,7 +72,7 @@ class DummyBackendTestCase(SimpleTestCase):
             test_tasks.calculate_meaning_of_life, (), {}
         )
 
-        enqueued_result = default_task_backend.results[0]  # type:ignore[attr-defined]
+        enqueued_result = default_task_backend.results[0]
         object.__setattr__(enqueued_result, "status", ResultStatus.COMPLETE)
 
         self.assertEqual(result.status, ResultStatus.NEW)
@@ -88,7 +84,7 @@ class DummyBackendTestCase(SimpleTestCase):
             test_tasks.calculate_meaning_of_life, (), {}
         )
 
-        enqueued_result = default_task_backend.results[0]  # type:ignore[attr-defined]
+        enqueued_result = default_task_backend.results[0]
         object.__setattr__(enqueued_result, "status", ResultStatus.COMPLETE)
 
         self.assertEqual(result.status, ResultStatus.NEW)
@@ -136,13 +132,9 @@ class DummyBackendTransactionTestCase(TransactionTestCase):
         with transaction.atomic():
             test_tasks.noop_task.enqueue()
 
-            self.assertEqual(
-                len(default_task_backend.results), 0
-            )  # type:ignore[attr-defined]
+            self.assertEqual(len(default_task_backend.results), 0)
 
-        self.assertEqual(
-            len(default_task_backend.results), 1
-        )  # type:ignore[attr-defined]
+        self.assertEqual(len(default_task_backend.results), 1)
 
     @override_settings(
         TASKS={
@@ -163,13 +155,9 @@ class DummyBackendTransactionTestCase(TransactionTestCase):
 
             self.assertIsNotNone(result.enqueued_at)
 
-            self.assertEqual(
-                len(default_task_backend.results), 1
-            )  # type:ignore[attr-defined]
+            self.assertEqual(len(default_task_backend.results), 1)
 
-        self.assertEqual(
-            len(default_task_backend.results), 1
-        )  # type:ignore[attr-defined]
+        self.assertEqual(len(default_task_backend.results), 1)
 
     @override_settings(
         TASKS={
@@ -189,13 +177,9 @@ class DummyBackendTransactionTestCase(TransactionTestCase):
 
             self.assertIsNone(result.enqueued_at)
 
-            self.assertEqual(
-                len(default_task_backend.results), 0
-            )  # type:ignore[attr-defined]
+            self.assertEqual(len(default_task_backend.results), 0)
 
-        self.assertEqual(
-            len(default_task_backend.results), 1
-        )  # type:ignore[attr-defined]
+        self.assertEqual(len(default_task_backend.results), 1)
         self.assertIsNone(result.enqueued_at)
         result.refresh()
         self.assertIsNotNone(result.enqueued_at)
@@ -222,13 +206,9 @@ class DummyBackendTransactionTestCase(TransactionTestCase):
 
             self.assertIsNone(result.enqueued_at)
 
-            self.assertEqual(
-                len(default_task_backend.results), 0
-            )  # type:ignore[attr-defined]
+            self.assertEqual(len(default_task_backend.results), 0)
 
-        self.assertEqual(
-            len(default_task_backend.results), 1
-        )  # type:ignore[attr-defined]
+        self.assertEqual(len(default_task_backend.results), 1)
         self.assertIsNone(result.enqueued_at)
         result.refresh()
         self.assertIsNotNone(result.enqueued_at)

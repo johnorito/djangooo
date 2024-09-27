@@ -27,12 +27,8 @@ class ImmediateBackendTestCase(SimpleTestCase):
                 self.assertEqual(result.status, ResultStatus.COMPLETE)
                 self.assertIsNotNone(result.started_at)
                 self.assertIsNotNone(result.finished_at)
-                self.assertGreaterEqual(
-                    result.started_at, result.enqueued_at
-                )  # type:ignore[arg-type, misc]
-                self.assertGreaterEqual(
-                    result.finished_at, result.started_at
-                )  # type:ignore[arg-type, misc]
+                self.assertGreaterEqual(result.started_at, result.enqueued_at)
+                self.assertGreaterEqual(result.finished_at, result.started_at)
                 self.assertIsNone(result.return_value)
                 self.assertEqual(result.task, task)
                 self.assertEqual(result.args, [1])
@@ -46,12 +42,8 @@ class ImmediateBackendTestCase(SimpleTestCase):
                 self.assertEqual(result.status, ResultStatus.COMPLETE)
                 self.assertIsNotNone(result.started_at)
                 self.assertIsNotNone(result.finished_at)
-                self.assertGreaterEqual(
-                    result.started_at, result.enqueued_at
-                )  # type:ignore[arg-type, misc]
-                self.assertGreaterEqual(
-                    result.finished_at, result.started_at
-                )  # type:ignore[arg-type, misc]
+                self.assertGreaterEqual(result.started_at, result.enqueued_at)
+                self.assertGreaterEqual(result.finished_at, result.started_at)
                 self.assertIsNone(result.return_value)
                 self.assertEqual(result.task, task)
                 self.assertEqual(result.args, [])
@@ -85,12 +77,8 @@ class ImmediateBackendTestCase(SimpleTestCase):
                 self.assertEqual(result.status, ResultStatus.FAILED)
                 self.assertIsNotNone(result.started_at)
                 self.assertIsNotNone(result.finished_at)
-                self.assertGreaterEqual(
-                    result.started_at, result.enqueued_at
-                )  # type:ignore[arg-type, misc]
-                self.assertGreaterEqual(
-                    result.finished_at, result.started_at
-                )  # type:ignore[arg-type, misc]
+                self.assertGreaterEqual(result.started_at, result.enqueued_at)
+                self.assertGreaterEqual(result.finished_at, result.started_at)
                 self.assertIsInstance(result.exception, exception)
                 self.assertTrue(
                     result.traceback
@@ -117,12 +105,8 @@ class ImmediateBackendTestCase(SimpleTestCase):
         self.assertEqual(result.status, ResultStatus.FAILED)
         self.assertIsNotNone(result.started_at)
         self.assertIsNotNone(result.finished_at)
-        self.assertGreaterEqual(
-            result.started_at, result.enqueued_at
-        )  # type:ignore[arg-type,misc]
-        self.assertGreaterEqual(
-            result.finished_at, result.started_at
-        )  # type:ignore[arg-type,misc]
+        self.assertGreaterEqual(result.started_at, result.enqueued_at)
+        self.assertGreaterEqual(result.finished_at, result.started_at)
 
         self.assertIsNone(result._return_value)
         self.assertIsNone(result.traceback)
@@ -158,7 +142,7 @@ class ImmediateBackendTestCase(SimpleTestCase):
             NotImplementedError,
             "This backend does not support retrieving or refreshing results.",
         ):
-            await default_task_backend.aget_result(123)  # type:ignore[arg-type]
+            await default_task_backend.aget_result(123)
 
     async def test_cannot_refresh_result(self):
         result = await default_task_backend.aenqueue(
