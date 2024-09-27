@@ -9,7 +9,6 @@ from django.tasks import DEFAULT_QUEUE_NAME
 from django.tasks.exceptions import InvalidTaskError
 from django.tasks.task import MAX_PRIORITY, MIN_PRIORITY, Task
 from django.tasks.utils import is_global_function
-from django.test.testcases import _DatabaseFailure
 from django.utils import timezone
 
 
@@ -39,11 +38,6 @@ class BaseTaskBackend(metaclass=ABCMeta):
         # If this project doesn't use a database, there's nothing to commit to
         if not connections.settings:
             return False
-
-        # If connections are disabled during tests, there's nothing to commit to
-        for conn in connections.all():
-            if isinstance(conn.connect, _DatabaseFailure):
-                return False
 
         if isinstance(task.enqueue_on_commit, bool):
             return task.enqueue_on_commit

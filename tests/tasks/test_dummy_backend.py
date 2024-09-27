@@ -99,7 +99,7 @@ class DummyBackendTestCase(SimpleTestCase):
             await default_task_backend.aget_result("123")
 
     def test_enqueue_on_commit(self):
-        self.assertFalse(
+        self.assertTrue(
             default_task_backend._get_enqueue_on_commit_for_task(
                 test_tasks.enqueue_on_commit_task
             )
@@ -115,6 +115,8 @@ class DummyBackendTestCase(SimpleTestCase):
 
 
 class DummyBackendTransactionTestCase(TransactionTestCase):
+    available_apps = []
+
     @override_settings(
         TASKS={
             "default": {
