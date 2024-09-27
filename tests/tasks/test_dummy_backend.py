@@ -1,9 +1,10 @@
 from typing import cast
 
 from django.db import transaction
-from django.tasks import ResultStatus, Task, default_task_backend, tasks
+from django.tasks import ResultStatus, default_task_backend, tasks
 from django.tasks.backends.dummy import DummyBackend
 from django.tasks.exceptions import ResultDoesNotExist
+from django.tasks.task import Task
 from django.test import SimpleTestCase, TransactionTestCase, override_settings
 
 from . import tasks as test_tasks

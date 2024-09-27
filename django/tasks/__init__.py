@@ -2,13 +2,11 @@ from django.utils.connection import BaseConnectionHandler, ConnectionProxy
 from django.utils.module_loading import import_string
 
 from . import checks, signal_handlers  # noqa
-from .backends.base import BaseTaskBackend
 from .exceptions import InvalidTaskBackendError
 from .task import (
     DEFAULT_QUEUE_NAME,
     DEFAULT_TASK_BACKEND_ALIAS,
     ResultStatus,
-    Task,
     TaskResult,
     task,
 )
@@ -19,7 +17,6 @@ __all__ = [
     "DEFAULT_QUEUE_NAME",
     "task",
     "ResultStatus",
-    "Task",
     "TaskResult",
 ]
 
@@ -48,6 +45,4 @@ class TasksHandler(BaseConnectionHandler):
 
 tasks = TasksHandler()
 
-default_task_backend: BaseTaskBackend = ConnectionProxy(
-    tasks, DEFAULT_TASK_BACKEND_ALIAS
-)
+default_task_backend = ConnectionProxy(tasks, DEFAULT_TASK_BACKEND_ALIAS)

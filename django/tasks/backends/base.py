@@ -5,6 +5,7 @@ from asgiref.sync import sync_to_async
 
 from django.core.checks import messages
 from django.db import connections
+from django.tasks import DEFAULT_QUEUE_NAME
 from django.tasks.exceptions import InvalidTaskError
 from django.tasks.task import MAX_PRIORITY, MIN_PRIORITY, Task
 from django.tasks.utils import is_global_function
@@ -25,8 +26,6 @@ class BaseTaskBackend(metaclass=ABCMeta):
     """Can results be retrieved after the fact (from **any** thread / process)"""
 
     def __init__(self, options):
-        from django.tasks import DEFAULT_QUEUE_NAME
-
         self.alias = options["ALIAS"]
         self.queues = set(options.get("QUEUES", [DEFAULT_QUEUE_NAME]))
         self.enqueue_on_commit = bool(options.get("ENQUEUE_ON_COMMIT", True))

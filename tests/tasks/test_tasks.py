@@ -4,7 +4,6 @@ from datetime import datetime, timedelta
 from django.tasks import (
     DEFAULT_QUEUE_NAME,
     ResultStatus,
-    Task,
     default_task_backend,
     task,
     tasks,
@@ -16,7 +15,7 @@ from django.tasks.exceptions import (
     InvalidTaskError,
     ResultDoesNotExist,
 )
-from django.tasks.task import MAX_PRIORITY, MIN_PRIORITY
+from django.tasks.task import MAX_PRIORITY, MIN_PRIORITY, Task
 from django.test import SimpleTestCase, override_settings
 from django.utils import timezone
 from django.utils.module_loading import import_string
