@@ -60,7 +60,7 @@ Minor features
 :mod:`django.contrib.gis`
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-* :lookup:`coveredby` lookup is now supported on MySQL.
+* :lookup:`coveredby` and :lookup:`covers` lookup are now supported on MySQL.
 
 * :lookup:`coveredby` lookup,
   :class:`~django.contrib.gis.db.models.Collect` aggregation, and
