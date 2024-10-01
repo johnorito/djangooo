@@ -105,6 +105,13 @@ Minor features
   processing instruction will be added to the top of the document for each
   stylesheet in the given list. See :ref:`feed-stylesheets` for more details.
 
+:mod:`django.shortcuts`
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* :func:`~django.shortcuts.redirect` now supports the boolean argument
+  ``preserve_method`` which in combination with ``permanent`` issues a response
+  code of 301, 302, 307 or 308.
+
 Asynchronous views
 ~~~~~~~~~~~~~~~~~~
 

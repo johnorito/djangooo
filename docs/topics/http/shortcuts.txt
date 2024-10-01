@@ -91,7 +91,7 @@ This example is equivalent to::
 ``redirect()``
 ==============
 
-.. function:: redirect(to, *args, permanent=False, **kwargs)
+.. function:: redirect(to, *args, permanent=False, preserve_method=False, **kwargs)
 
    Returns an :class:`~django.http.HttpResponseRedirect` to the appropriate URL
    for the arguments passed.
@@ -109,6 +109,11 @@ This example is equivalent to::
 
    By default issues a temporary redirect; pass ``permanent=True`` to issue a
    permanent redirect.
+
+.. versionadded:: 5.2
+
+   By passing ``preserve_method=True`` the response signal the user agent to
+   preserve HTTP method when doing the redirection.
 
 Examples
 --------
