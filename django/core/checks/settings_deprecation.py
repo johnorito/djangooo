@@ -8,6 +8,7 @@ def deprecated_settings_variables(*args, **kwargs):
     """
 
     deprecated_settings_list = (
+        # todo: add older settings
         # Django 1.4
         "TRANSACTIONS_MANAGED",
         # Django 1.5
@@ -26,30 +27,33 @@ def deprecated_settings_variables(*args, **kwargs):
         "SOUTH_MIGRATION_MODULES",
         "SOUTH_USE_PYC",
         # Django 1.8
-        "TEMPLATE_DIRS",
-        "TEMPLATE_CONTEXT_PROCESSORS",
-        "TEMPLATE_LOADERS",
-        "TEMPLATE_DEBUG",
-        "ALLOWED_INCLUDE_ROOTS",
-        "USE_ETAGS",
+        "SEND_BROKEN_LINK_EMAILS",
+        "CACHE_MIDDLEWARE_ANONYMOUS_ONLY",
         # Django 1.9
         "FILE_UPLOAD_HANDLERS",
         # Django 1.10
+        "ALLOWED_INCLUDE_ROOTS",
+        "LOGOUT_URL"
         "SECURE_PROXY_SSL_HEADER",
-        # Django 2.0
-        "DEFAULT_CONTENT_TYPE",
-        "FILE_CHARSET",
+        "TEMPLATE_CONTEXT_PROCESSORS",
+        "TEMPLATE_DEBUG",
+        "TEMPLATE_DIRS",
+        "TEMPLATE_LOADERS",
+        "TEMPLATE_STRING_IF_INVALID",
         # Django 2.1
+        "USE_ETAGS",
         "SECURE_BROWSER_XSS_FILTER",
         # Django 3.0
+        "DEFAULT_CONTENT_TYPE",
         "PASSWORD_RESET_TIMEOUT_DAYS",
         # Django 3.1
         "DEFAULT_FILE_STORAGE",
+        "FILE_CHARSET",
         # Django 4.0
-        "USE_L10N",
         "DEFAULT_HASHING_ALGORITHM",
-        # Django 4.1
         "PASSWORD_RESET_TIMEOUT_DAYS",
+        "SECURE_BROWSER_XSS_FILTER",
+        # Django 4.1
         "DEFAULT_STORAGE_CLASS",
         # Django 4.2
         "MIDDLEWARE_CLASSES",
@@ -57,8 +61,12 @@ def deprecated_settings_variables(*args, **kwargs):
         "ADMINS",
         "MANAGERS",
         # Django 5.0
+        "USE_L10N",
         "USE_DEPRECATED_PYTZ",
+        "CSRF_COOKIE_MASKED",
         "DATABASE_OPTIONS",
+        # todo: DATABASES->name->TEST->SERIALIZE not yet covered
+        # Django 5.1
         "DEFAULT_FILE_STORAGE",
         "STATICFILES_STORAGE",
     )
@@ -68,8 +76,10 @@ def deprecated_settings_variables(*args, **kwargs):
         if attribute in deprecated_settings_list:
             warning_list.append(
                 checks.Warning(
-                    f'You still use {attribute!r} in your Django settings file. This attribute is deprecated.',
-                    hint="Please refer to the documentation and remove/replace this attribute.",
+                    f'You still use {attribute!r} in your Django settings file. '
+                    f'This attribute is deprecated.',
+                    hint="Please refer to the documentation and remove/replace "
+                         "this attribute.",
                     id="settings.W001",
                 )
             )
