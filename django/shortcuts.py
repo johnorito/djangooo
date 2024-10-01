@@ -43,7 +43,7 @@ def redirect(to, *args, permanent=False, preserve_method=False, **kwargs):
         * A URL, which will be used as-is for the redirect location.
 
     Issues a temporary redirect by default; pass permanent=True to issue a
-    permanent redirect. Pass preserve_method=True to issue a redirect tha must
+    permanent redirect. Pass preserve_method=True to issue a redirect that must
     preserve HTTP verb.
     """
 
@@ -53,7 +53,7 @@ def redirect(to, *args, permanent=False, preserve_method=False, **kwargs):
         redirect_class = HttpResponsePermanentRedirect
     if preserve_method and not permanent:
         redirect_class = HttpResponseTemporaryRedirectWithSameMethod
-    if preserve_method and not permanent:
+    if preserve_method and permanent:
         redirect_class = HttpResponsePermanentRedirectWithSameMethod
 
     return redirect_class(resolve_url(to, *args, **kwargs))
