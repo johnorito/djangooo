@@ -109,8 +109,8 @@ Minor features
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 * :func:`~django.shortcuts.redirect` now supports the boolean argument
-  ``preserve_method`` which in combination with ``permanent`` issues a response
-  code of 301, 302, 307 or 308.
+  ``preserve_method`` which signals the user agent to preserve the HTTP method
+  when doing the redirection.
 
 Asynchronous views
 ~~~~~~~~~~~~~~~~~~

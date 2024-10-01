@@ -110,10 +110,8 @@ This example is equivalent to::
    By default issues a temporary redirect; pass ``permanent=True`` to issue a
    permanent redirect.
 
-.. versionadded:: 5.2
-
-   By passing ``preserve_method=True`` the response signal the user agent to
-   preserve HTTP method when doing the redirection.
+   By passing ``preserve_method=True`` the response signals the user agent to
+   preserve the HTTP method when doing the redirection.
 
 Examples
 --------
