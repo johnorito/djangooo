@@ -108,9 +108,8 @@ Minor features
 :mod:`django.shortcuts`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-* :func:`~django.shortcuts.redirect` now supports the boolean argument
-  ``preserve_method`` which signals the user agent to preserve the HTTP method
-  when doing the redirection.
+* :func:`~django.shortcuts.redirect` now supports preserving the HTTP method
+   during redirection.
 
 Asynchronous views
 ~~~~~~~~~~~~~~~~~~
