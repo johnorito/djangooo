@@ -8,9 +8,7 @@ from django.http import (
     Http404,
     HttpResponse,
     HttpResponsePermanentRedirect,
-    HttpResponsePermanentRedirectWithSameMethod,
     HttpResponseRedirect,
-    HttpResponseTemporaryRedirectWithSameMethod,
 )
 from django.template import loader
 from django.urls import NoReverseMatch, reverse
@@ -47,16 +45,13 @@ def redirect(to, *args, permanent=False, preserve_method=False, **kwargs):
     preserve HTTP verb.
     """
 
-    redirect_class = HttpResponseRedirect
+    redirect_class = (
+        HttpResponsePermanentRedirect if permanent else HttpResponseRedirect
+    )
 
-    if not preserve_method and permanent:
-        redirect_class = HttpResponsePermanentRedirect
-    if preserve_method and not permanent:
-        redirect_class = HttpResponseTemporaryRedirectWithSameMethod
-    if preserve_method and permanent:
-        redirect_class = HttpResponsePermanentRedirectWithSameMethod
-
-    return redirect_class(resolve_url(to, *args, **kwargs))
+    return redirect_class(
+        resolve_url(to, *args, **kwargs), preserve_method=preserve_method
+    )
 
 
 def _get_queryset(klass):
