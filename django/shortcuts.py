@@ -40,9 +40,9 @@ def redirect(to, *args, permanent=False, preserve_method=False, **kwargs):
 
         * A URL, which will be used as-is for the redirect location.
 
-    Issues a temporary redirect by default; pass permanent=True to issue a
+    Issues a temporary redirect by default. Pass permanent=True to issue a
     permanent redirect. Pass preserve_method=True to issue a redirect that must
-    preserve HTTP verb.
+    preserve the HTTP method.
     """
 
     redirect_class = (
