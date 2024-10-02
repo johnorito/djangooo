@@ -581,13 +581,13 @@ class HttpResponseSubclassesTests(SimpleTestCase):
     def test_redirect_permanent_preserve_method(self):
         response = HttpResponsePermanentRedirect(
             "/redirected/",
-            content="The resource has temporarily moved",
+            content="The resource has permanently moved, please use same method",
             preserve_method=True,
         )
         self.assertEqual(response.status_code, 308)
         self.assertContains(
             response,
-            "The resource has temporarily moved",
+            "The resource has permanently moved, please use same method",
             status_code=308,
         )
         self.assertEqual(response.url, response.headers["Location"])
