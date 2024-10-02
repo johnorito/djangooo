@@ -1615,7 +1615,7 @@ class AutodetectorTests(BaseAutodetectorTests):
                 ("pkfield", models.IntegerField(primary_key=False)),
             ],
         )
-        changes = self.get_changes([initial_state], [updated_state])
+        self.get_changes([initial_state], [updated_state])
 
     @mock.patch(
         "django.db.migrations.questioner.MigrationQuestioner.ask_not_null_alteration",
