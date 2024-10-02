@@ -164,6 +164,14 @@ will be returned::
         obj = MyModel.objects.get(...)
         return redirect(obj, permanent=True)
 
+Additionally, the ``preserve_method`` argument can be used to preserve the
+original HTTP method::
+
+    def my_view(request):
+        ...
+        obj = MyModel.objects.get(...)
+        return redirect(obj, preserve_method=True)
+
 ``get_object_or_404()``
 =======================
 
