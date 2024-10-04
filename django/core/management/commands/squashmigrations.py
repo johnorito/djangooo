@@ -74,9 +74,7 @@ class Command(BaseCommand):
             raise CommandError(str(err))
         # Load the current graph state, check the app and migration they asked
         # for exists.
-        loader = MigrationLoader(
-            connections[DEFAULT_DB_ALIAS], replace_migrations=False
-        )
+        loader = MigrationLoader(connections[DEFAULT_DB_ALIAS])
         if app_label not in loader.migrated_apps:
             raise CommandError(
                 "App '%s' does not have migrations (so squashmigrations on "
@@ -84,34 +82,27 @@ class Command(BaseCommand):
             )
 
         migration = self.find_migration(loader, app_label, migration_name)
-
-        # Work out the list of predecessor migrations
-        migrations_to_squash = [
-            loader.get_migration(al, mn)
-            for al, mn in loader.graph.forwards_plan(
-                (migration.app_label, migration.name)
+        try:
+            # First try to work with replacement migrations. They might be optimized
+            # manually after a previous squash.
+            migrations_to_squash = self.get_migrations_to_squash(
+                loader, migration.app_label, start_migration_name, migration.name
             )
-            if al == migration.app_label
-        ]
-
-        if start_migration_name:
-            start_migration = self.find_migration(
-                loader, app_label, start_migration_name
-            )
-            start = loader.get_migration(
-                start_migration.app_label, start_migration.name
-            )
-            try:
-                start_index = migrations_to_squash.index(start)
-                migrations_to_squash = migrations_to_squash[start_index:]
-            except ValueError:
-                raise CommandError(
-                    "The migration '%s' cannot be found. Maybe it comes after "
-                    "the migration '%s'?\n"
-                    "Have a look at:\n"
-                    "  python manage.py showmigrations %s\n"
-                    "to debug this issue." % (start_migration, migration, app_label)
+        except CommandError:
+            # If start/end migration was squashed, then we have to work with
+            # pre-squash (replaced) migrations.
+            loader.replace_migrations = False
+            loader.build_graph()
+            replacement_keys = list(loader.replacements)
+            for replacement_key in replacement_keys:
+                replacement_migration = loader.get_migration(*replacement_key)
+                loader.graph.remove_replacement_node(
+                    replacement_key, replacement_migration.replaces
                 )
+
+            migrations_to_squash = self.get_migrations_to_squash(
+                loader, migration.app_label, start_migration_name, migration.name
+            )
 
         # Tell them what we're doing and optionally ask if we should proceed
         if self.verbosity > 0 or self.interactive:
@@ -192,6 +183,7 @@ class Command(BaseCommand):
             },
         )
         if start_migration_name:
+            start_migration = migrations_to_squash[0]
             if squashed_name:
                 # Use the name from --squashed-name.
                 prefix, _ = start_migration.name.split("_", 1)
@@ -257,3 +249,35 @@ class Command(BaseCommand):
                 "Cannot find a migration matching '%s' from app '%s'."
                 % (name, app_label)
             )
+
+    def get_migrations_to_squash(
+        self, loader, app_label, start_migration_name, end_migration_name
+    ):
+        # Work out the list of predecessor migrations
+        migrations_to_squash = [
+            loader.get_migration(al, mn)
+            for al, mn in loader.graph.forwards_plan((app_label, end_migration_name))
+            if al == app_label
+        ]
+
+        if start_migration_name:
+            start_migration = self.find_migration(
+                loader, app_label, start_migration_name
+            )
+            start = loader.get_migration(
+                start_migration.app_label, start_migration.name
+            )
+            try:
+                start_index = migrations_to_squash.index(start)
+                migrations_to_squash = migrations_to_squash[start_index:]
+            except ValueError:
+                raise CommandError(
+                    "The migration '%s' cannot be found. Maybe it comes after "
+                    "the migration '%s'?\n"
+                    "Have a look at:\n"
+                    "  python manage.py showmigrations %s\n"
+                    "to debug this issue."
+                    % (start_migration, end_migration_name, app_label)
+                )
+
+        return migrations_to_squash
