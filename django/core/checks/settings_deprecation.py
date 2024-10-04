@@ -7,7 +7,7 @@ def deprecated_settings_variables(*args, **kwargs):
     This check warns users who still use deprecated settings variables.
     """
 
-    deprecated_settings_list = (
+    deprecated_settings_list = {
         # todo: add older settings
         # Django 1.4
         "TRANSACTIONS_MANAGED",
@@ -67,9 +67,10 @@ def deprecated_settings_variables(*args, **kwargs):
         "DATABASE_OPTIONS",
         # todo: DATABASES->name->TEST->SERIALIZE not yet covered
         # Django 5.1
+        # https://docs.djangoproject.com/en/stable/releases/5.1/#features-removed-in-5-1
         "DEFAULT_FILE_STORAGE",
         "STATICFILES_STORAGE",
-    )
+    }
 
     warning_list = []
     for attribute, _ in vars(settings).items():
