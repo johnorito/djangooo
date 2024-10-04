@@ -32,7 +32,7 @@ def deprecated_settings_variables(*args, **kwargs):
         "FILE_UPLOAD_HANDLERS",
         # Django 1.10
         "ALLOWED_INCLUDE_ROOTS",
-        "LOGOUT_URL"
+        "LOGOUT_URL",
         "SECURE_PROXY_SSL_HEADER",
         "TEMPLATE_CONTEXT_PROCESSORS",
         "TEMPLATE_DEBUG",
@@ -73,10 +73,10 @@ def deprecated_settings_variables(*args, **kwargs):
         if attribute in deprecated_settings_list:
             warning_list.append(
                 checks.Warning(
-                    f'You still use {attribute!r} in your Django settings file. '
-                    f'This attribute is deprecated.',
+                    f"You still use {attribute!r} in your Django settings file. "
+                    f"This attribute is deprecated.",
                     hint="Please refer to the documentation and remove/replace "
-                         "this attribute.",
+                    "this attribute.",
                     id="settings.W001",
                 )
             )

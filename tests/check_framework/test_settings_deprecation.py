@@ -18,7 +18,7 @@ class SettingsDeprecationCheckTests(SimpleTestCase):
                     "You still use 'TRANSACTIONS_MANAGED' in your Django settings "
                     "file. This attribute is deprecated.",
                     hint="Please refer to the documentation and remove/replace "
-                         "this attribute.",
+                    "this attribute.",
                     id="settings.W001",
                 ),
             ],
