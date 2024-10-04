@@ -239,14 +239,14 @@ class MigrationAutodetector:
         self.through_users = {}
         self.old_field_keys = {
             (app_label, model_name, field_name)
-            for app_label, model_name in self.kept_model_keys
+            for app_label, model_name in self.kept_model_keys | self.kept_unmanaged_keys
             for field_name in self.from_state.models[
                 app_label, self.renamed_models.get((app_label, model_name), model_name)
             ].fields
         }
         self.new_field_keys = {
             (app_label, model_name, field_name)
-            for app_label, model_name in self.kept_model_keys
+            for app_label, model_name in self.kept_model_keys | self.kept_unmanaged_keys
             for field_name in self.to_state.models[app_label, model_name].fields
         }
 

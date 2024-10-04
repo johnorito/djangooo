@@ -712,6 +712,26 @@ class AutodetectorTests(BaseAutodetectorTests):
     author_unmanaged = ModelState(
         "testapp", "AuthorUnmanaged", [], {"managed": False}, ("testapp.author",)
     )
+    author_unmanaged_name_default = ModelState(
+        "testapp",
+        "Author",
+        [
+            ("id", models.AutoField(primary_key=True)),
+            ("name", models.CharField(max_length=200, default="Ada Lovelace")),
+        ],
+        {"managed": False},
+        ("testapp.author",),
+    )
+    author_unmanaged_name_longer = ModelState(
+        "testapp",
+        "Author",
+        [
+            ("id", models.AutoField(primary_key=True)),
+            ("name", models.CharField(max_length=400)),
+        ],
+        {"managed": False},
+        ("testapp.author",),
+    )
     author_unmanaged_managed = ModelState(
         "testapp", "AuthorUnmanaged", [], {}, ("testapp.author",)
     )
@@ -3520,7 +3540,7 @@ class AutodetectorTests(BaseAutodetectorTests):
         self.assertEqual(fk_field.remote_field.model, "testapp.AAuthorProxyProxy")
 
     def test_unmanaged_create(self):
-        """The autodetector correctly deals with managed models."""
+        """The autodetector correctly deals with unmanaged models."""
         # First, we test adding an unmanaged model
         changes = self.get_changes(
             [self.author_empty], [self.author_empty, self.author_unmanaged]
@@ -3530,6 +3550,18 @@ class AutodetectorTests(BaseAutodetectorTests):
         self.assertOperationTypes(changes, "testapp", 0, ["CreateModel"])
         self.assertOperationAttributes(
             changes, "testapp", 0, 0, name="AuthorUnmanaged", options={"managed": False}
+        )
+
+    def test_unmanaged_alter_field(self):
+        """Tests autodetection of new fields on an unmanaged model."""
+        changes = self.get_changes(
+            [self.author_unmanaged_name_default], [self.author_unmanaged_name_longer]
+        )
+        # Right number/type of migrations?
+        self.assertNumberMigrations(changes, "testapp", 1)
+        self.assertOperationTypes(changes, "testapp", 0, ["AlterField"])
+        self.assertOperationAttributes(
+            changes, "testapp", 0, 0, name="name", preserve_default=True
         )
 
     def test_unmanaged_delete(self):
