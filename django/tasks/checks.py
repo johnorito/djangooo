@@ -8,7 +8,4 @@ def check_tasks(app_configs=None, **kwargs):
     from django.tasks import tasks
 
     for backend in tasks.all():
-        try:
-            yield from backend.check()
-        except NotImplementedError:
-            pass
+        yield from backend.check()

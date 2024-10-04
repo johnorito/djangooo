@@ -13,6 +13,7 @@ from .task import (
 
 __all__ = [
     "tasks",
+    "default_task_backend",
     "DEFAULT_TASK_BACKEND_ALIAS",
     "DEFAULT_QUEUE_NAME",
     "task",
@@ -26,10 +27,7 @@ class TasksHandler(BaseConnectionHandler):
     exception_class = InvalidTaskBackendError
 
     def create_connection(self, alias):
-        params = self.settings[alias].copy()
-
-        # Added back to allow a backend to self-identify
-        params["ALIAS"] = alias
+        params = self.settings[alias]
 
         backend = params["BACKEND"]
 
@@ -40,7 +38,7 @@ class TasksHandler(BaseConnectionHandler):
                 f"Could not find backend '{backend}': {e}"
             ) from e
 
-        return backend_cls(params)
+        return backend_cls({**params, "ALIAS": alias})
 
 
 tasks = TasksHandler()
