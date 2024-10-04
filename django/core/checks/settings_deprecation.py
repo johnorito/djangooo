@@ -24,6 +24,7 @@ def deprecated_settings_variables(*args, **kwargs):
         # Django 1.5
         "AUTH_PROFILE_MODULE",
         # Django 1.7
+        # https://docs.djangoproject.com/en/stable/releases/1.7/#features-removed-in-1-7
         "SOUTH_DATABASE_ADAPTER",
         "SOUTH_DATABASE_ADAPTERS",
         "SOUTH_AUTO_FREEZE_APP",
@@ -33,9 +34,13 @@ def deprecated_settings_variables(*args, **kwargs):
         "SOUTH_MIGRATION_MODULES",
         "SOUTH_USE_PYC",
         # Django 1.8
+        # https://docs.djangoproject.com/en/stable/releases/1.8/#features-removed-in-1-8
         "SEND_BROKEN_LINK_EMAILS",
         "CACHE_MIDDLEWARE_ANONYMOUS_ONLY",
+        # Django 1.9
+        # https://docs.djangoproject.com/en/stable/releases/1.9/#features-removed-in-1-9
         # Django 1.10
+        # https://docs.djangoproject.com/en/stable/releases/1.10/#features-removed-in-1-10
         "ALLOWED_INCLUDE_ROOTS",
         "LOGOUT_URL",
         "TEMPLATE_CONTEXT_PROCESSORS",
@@ -44,21 +49,29 @@ def deprecated_settings_variables(*args, **kwargs):
         "TEMPLATE_LOADERS",
         "TEMPLATE_STRING_IF_INVALID",
         # Django 2.0
+        # https://docs.djangoproject.com/en/stable/releases/2.0/#features-removed-in-2-0
         "MIDDLEWARE_CLASSES",
         # Django 2.1
+        # https://docs.djangoproject.com/en/stable/releases/2.1/#features-removed-in-2-1
         "USE_ETAGS",
         "SECURE_BROWSER_XSS_FILTER",
         # Django 3.0
+        # https://docs.djangoproject.com/en/stable/releases/3.0/#features-removed-in-3-0
         "DEFAULT_CONTENT_TYPE",
         "PASSWORD_RESET_TIMEOUT_DAYS",
         # Django 3.1
+        # https://docs.djangoproject.com/en/stable/releases/3.1/#features-removed-in-3-1
         "DEFAULT_FILE_STORAGE",
         "FILE_CHARSET",
         # Django 4.0
+        # https://docs.djangoproject.com/en/stable/releases/4.0/#features-removed-in-4-0
         "DEFAULT_HASHING_ALGORITHM",
         "PASSWORD_RESET_TIMEOUT_DAYS",
         "SECURE_BROWSER_XSS_FILTER",
+        # Django 4.1
+        # https://docs.djangoproject.com/en/stable/releases/4.1/#features-removed-in-4-1
         # Django 5.0
+        # https://docs.djangoproject.com/en/stable/releases/5.0/#features-removed-in-5-0
         "USE_L10N",
         "USE_DEPRECATED_PYTZ",
         "CSRF_COOKIE_MASKED",
