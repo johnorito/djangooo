@@ -11,7 +11,12 @@ from . import tasks as test_tasks
 
 
 @override_settings(
-    TASKS={"default": {"BACKEND": "django.tasks.backends.dummy.DummyBackend"}}
+    TASKS={
+        "default": {
+            "BACKEND": "django.tasks.backends.dummy.DummyBackend",
+            "ENQUEUE_ON_COMMIT": False,
+        }
+    }
 )
 class DummyBackendTestCase(SimpleTestCase):
     def setUp(self):
