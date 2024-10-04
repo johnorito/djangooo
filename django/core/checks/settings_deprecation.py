@@ -12,7 +12,6 @@ def deprecated_settings_variables(*args, **kwargs):
         # Django 1.4
         "TRANSACTIONS_MANAGED",
         # Django 1.5
-        "SITE_ID",
         "AUTH_PROFILE_MODULE",
         "CSRF_COOKIE_PATH",
         # Django 1.6
@@ -40,6 +39,8 @@ def deprecated_settings_variables(*args, **kwargs):
         "TEMPLATE_DIRS",
         "TEMPLATE_LOADERS",
         "TEMPLATE_STRING_IF_INVALID",
+        # Django 2.0
+        "MIDDLEWARE_CLASSES",
         # Django 2.1
         "USE_ETAGS",
         "SECURE_BROWSER_XSS_FILTER",
@@ -53,13 +54,8 @@ def deprecated_settings_variables(*args, **kwargs):
         "DEFAULT_HASHING_ALGORITHM",
         "PASSWORD_RESET_TIMEOUT_DAYS",
         "SECURE_BROWSER_XSS_FILTER",
-        # Django 4.1
-        "DEFAULT_STORAGE_CLASS",
         # Django 4.2
-        "MIDDLEWARE_CLASSES",
         "FILE_UPLOAD_HANDLERS",
-        "ADMINS",
-        "MANAGERS",
         # Django 5.0
         "USE_L10N",
         "USE_DEPRECATED_PYTZ",
