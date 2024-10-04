@@ -8,7 +8,12 @@ def deprecated_settings_variables(*args, **kwargs):
     """
 
     deprecated_settings_list = {
+        # Django 1.0
+        # https://docs.djangoproject.com/en/stable/releases/1.0/
+        # Django 1.1
+        # https://docs.djangoproject.com/en/stable/releases/1.1/#features-deprecated-in-1-1
         # Django 1.2
+        # https://docs.djangoproject.com/en/stable/releases/1.2/#features-deprecated-in-1-2
         "DATABASE_ENGINE",
         "DATABASE_HOST",
         "DATABASE_NAME",
@@ -19,9 +24,13 @@ def deprecated_settings_variables(*args, **kwargs):
         "TEST_DATABASE_CHARSET",
         "TEST_DATABASE_COLLATION",
         "TEST_DATABASE_NAME",
+        # Django 1.3
+        # https://docs.djangoproject.com/en/stable/releases/1.3/#features-deprecated-in-1-3
         # Django 1.4
+        # https://docs.djangoproject.com/en/stable/releases/1.4/#features-deprecated-in-1-4
         "TRANSACTIONS_MANAGED",
         # Django 1.5
+        # https://docs.djangoproject.com/en/stable/releases/1.5/#features-deprecated-in-1-5
         "AUTH_PROFILE_MODULE",
         # Django 1.7
         # https://docs.djangoproject.com/en/stable/releases/1.7/#features-removed-in-1-7
@@ -76,7 +85,6 @@ def deprecated_settings_variables(*args, **kwargs):
         "USE_DEPRECATED_PYTZ",
         "CSRF_COOKIE_MASKED",
         "DATABASE_OPTIONS",
-        # todo: DATABASES->name->TEST->SERIALIZE not yet covered
         # Django 5.1
         # https://docs.djangoproject.com/en/stable/releases/5.1/#features-removed-in-5-1
         "DEFAULT_FILE_STORAGE",
