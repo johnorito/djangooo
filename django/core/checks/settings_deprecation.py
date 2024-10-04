@@ -8,14 +8,21 @@ def deprecated_settings_variables(*args, **kwargs):
     """
 
     deprecated_settings_list = {
-        # todo: add older settings
+        # Django 1.2
+        "DATABASE_ENGINE",
+        "DATABASE_HOST",
+        "DATABASE_NAME",
+        "DATABASE_OPTIONS",
+        "DATABASE_PASSWORD",
+        "DATABASE_PORT",
+        "DATABASE_USER",
+        "TEST_DATABASE_CHARSET",
+        "TEST_DATABASE_COLLATION",
+        "TEST_DATABASE_NAME",
         # Django 1.4
         "TRANSACTIONS_MANAGED",
         # Django 1.5
         "AUTH_PROFILE_MODULE",
-        "CSRF_COOKIE_PATH",
-        # Django 1.6
-        "DATABASE_ENGINE",
         # Django 1.7
         "SOUTH_DATABASE_ADAPTER",
         "SOUTH_DATABASE_ADAPTERS",
@@ -28,12 +35,9 @@ def deprecated_settings_variables(*args, **kwargs):
         # Django 1.8
         "SEND_BROKEN_LINK_EMAILS",
         "CACHE_MIDDLEWARE_ANONYMOUS_ONLY",
-        # Django 1.9
-        "FILE_UPLOAD_HANDLERS",
         # Django 1.10
         "ALLOWED_INCLUDE_ROOTS",
         "LOGOUT_URL",
-        "SECURE_PROXY_SSL_HEADER",
         "TEMPLATE_CONTEXT_PROCESSORS",
         "TEMPLATE_DEBUG",
         "TEMPLATE_DIRS",
@@ -54,8 +58,6 @@ def deprecated_settings_variables(*args, **kwargs):
         "DEFAULT_HASHING_ALGORITHM",
         "PASSWORD_RESET_TIMEOUT_DAYS",
         "SECURE_BROWSER_XSS_FILTER",
-        # Django 4.2
-        "FILE_UPLOAD_HANDLERS",
         # Django 5.0
         "USE_L10N",
         "USE_DEPRECATED_PYTZ",
@@ -69,8 +71,8 @@ def deprecated_settings_variables(*args, **kwargs):
     }
 
     warning_list = []
-    for attribute, _ in vars(settings).items():
-        if attribute in deprecated_settings_list:
+    for attribute in dir(settings):
+        if attribute.isupper() and attribute in deprecated_settings_list:
             warning_list.append(
                 checks.Warning(
                     f"You still use {attribute!r} in your Django settings file. "
