@@ -2,7 +2,7 @@ from django.conf import settings
 from django.core import checks
 
 
-def deprecated_settings_variables(*args, **kwargs):
+def check_deprecated_settings():
     """
     This check warns users who still use deprecated settings variables.
     """
