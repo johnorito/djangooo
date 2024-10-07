@@ -273,11 +273,11 @@ class Command(BaseCommand):
             except ValueError:
                 raise CommandError(
                     "The migration '%s' cannot be found. Maybe it comes after "
-                    "the migration '%s'?\n"
+                    "the migration '%s.%s'?\n"
                     "Have a look at:\n"
                     "  python manage.py showmigrations %s\n"
                     "to debug this issue."
-                    % (start_migration, end_migration_name, app_label)
+                    % (start_migration, app_label, end_migration_name, app_label)
                 )
 
         return migrations_to_squash
