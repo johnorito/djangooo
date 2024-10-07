@@ -1,5 +1,6 @@
 from django.conf import settings
-from . import register, Tags, Warning
+
+from . import Tags, Warning, register
 
 DEPRECATED_SETTINGS = {
     # Django 1.0

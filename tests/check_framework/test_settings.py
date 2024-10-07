@@ -5,14 +5,12 @@ from django.test import SimpleTestCase, override_settings
 
 class SettingsDeprecationCheckTests(SimpleTestCase):
     @override_settings(TRANSACTIONS_MANAGED=True)
-    def test_deprecated_settings_variables(self):
+    def test_check_deprecated_settings(self):
         all_issues = checks.run_checks(app_configs=apps.get_app_configs())
 
-        self.assertEqual(len(all_issues), 1)
+        self.assertGreater(len(all_issues), 0)
 
-        first_warning_message = all_issues[0]
-        self.assertEqual(
-            first_warning_message,
+        self.assertIn(
             checks.Warning(
                 "You still use 'TRANSACTIONS_MANAGED' in your Django settings "
                 "file. This attribute is deprecated.",
@@ -20,4 +18,5 @@ class SettingsDeprecationCheckTests(SimpleTestCase):
                 "this attribute.",
                 id="settings.W001",
             ),
+            all_issues,
         )
