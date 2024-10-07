@@ -93,10 +93,10 @@ def check_deprecated_settings(**kwargs):
     This check warns users who still use deprecated settings variables.
     """
 
-    warning_list = []
+    warnings = []
     for attribute in dir(settings):
         if attribute.isupper() and attribute in DEPRECATED_SETTINGS:
-            warning_list.append(
+            warnings.append(
                 Warning(
                     f"You still use {attribute!r} in your Django settings file. "
                     f"This attribute is deprecated.",
@@ -106,4 +106,4 @@ def check_deprecated_settings(**kwargs):
                 )
             )
 
-    return warning_list
+    return warnings
