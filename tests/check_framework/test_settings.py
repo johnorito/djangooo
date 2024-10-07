@@ -1,16 +1,16 @@
+from django.apps import apps
 from django.core import checks
-from django.core.checks.settings_deprecation import check_deprecated_settings
 from django.test import SimpleTestCase, override_settings
 
 
 class SettingsDeprecationCheckTests(SimpleTestCase):
     @override_settings(TRANSACTIONS_MANAGED=True)
     def test_deprecated_settings_variables(self):
-        warning_list = check_deprecated_settings()
+        all_issues = checks.run_checks(app_configs=apps.get_app_configs())
 
-        self.assertEqual(len(warning_list), 1)
+        self.assertEqual(len(all_issues), 1)
 
-        first_warning_message = warning_list[0]
+        first_warning_message = all_issues[0]
         self.assertEqual(
             first_warning_message,
             checks.Warning(

@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.core import checks
+from . import register, Tags, Warning
 
 DEPRECATED_SETTINGS = {
     # Django 1.0
@@ -86,7 +86,8 @@ DEPRECATED_SETTINGS = {
 }
 
 
-def check_deprecated_settings():
+@register(Tags.settings)
+def check_deprecated_settings(**kwargs):
     """
     This check warns users who still use deprecated settings variables.
     """
@@ -95,7 +96,7 @@ def check_deprecated_settings():
     for attribute in dir(settings):
         if attribute.isupper() and attribute in DEPRECATED_SETTINGS:
             warning_list.append(
-                checks.Warning(
+                Warning(
                     f"You still use {attribute!r} in your Django settings file. "
                     f"This attribute is deprecated.",
                     hint="Please refer to the documentation and remove/replace "
