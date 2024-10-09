@@ -90,7 +90,6 @@ DEPRECATED_SETTINGS = {
     "USE_DEPRECATED_PYTZ",
     "CSRF_COOKIE_MASKED",
     "DATABASE_OPTIONS",
-    "FORMS_URLFIELD_ASSUME_HTTPS",
     # Django 5.1
     # https://docs.djangoproject.com/en/stable/releases/5.1/#features-removed-in-5-1
     "DEFAULT_FILE_STORAGE",
