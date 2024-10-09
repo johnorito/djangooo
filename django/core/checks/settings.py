@@ -37,6 +37,16 @@ DEPRECATED_SETTINGS = {
     "SOUTH_LOGGING_FILE",
     "SOUTH_MIGRATION_MODULES",
     "SOUTH_USE_PYC",
+    "TEST_CREATE",
+    "TEST_USER_CREATE",
+    "TEST_PASSWD",
+    "TEST_DATABASE_ENGINE",
+    "TEST_DATABASE_HOST",
+    "TEST_DATABASE_NAME",
+    "TEST_DATABASE_OPTIONS",
+    "TEST_DATABASE_PASSWORD",
+    "TEST_DATABASE_PORT",
+    "TEST_DATABASE_USER",
     # Django 1.8
     # https://docs.djangoproject.com/en/stable/releases/1.8/#features-removed-in-1-8
     "SEND_BROKEN_LINK_EMAILS",
@@ -80,6 +90,7 @@ DEPRECATED_SETTINGS = {
     "USE_DEPRECATED_PYTZ",
     "CSRF_COOKIE_MASKED",
     "DATABASE_OPTIONS",
+    "FORMS_URLFIELD_ASSUME_HTTPS",
     # Django 5.1
     # https://docs.djangoproject.com/en/stable/releases/5.1/#features-removed-in-5-1
     "DEFAULT_FILE_STORAGE",
