@@ -567,6 +567,12 @@ Signals
   a lazy reference to the sender ``<app label>.<model>``, but app ``<app label>``
   isn't installed or doesn't provide model ``<model>``.
 
+Settings
+--------
+
+* **settings.W001**: Checks the Django settings for used but deprecated
+variables.
+
 Templates
 ---------
 
