@@ -94,6 +94,9 @@ DEPRECATED_SETTINGS = {
     # https://docs.djangoproject.com/en/stable/releases/5.1/#features-removed-in-5-1
     "DEFAULT_FILE_STORAGE",
     "STATICFILES_STORAGE",
+    # Django 6.0
+    # RemovedInDjango60Warning: when the deprecation ends, replace with:
+    # "FORMS_URLFIELD_ASSUME_HTTPS",
 }
 
 
