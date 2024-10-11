@@ -571,7 +571,7 @@ Settings
 --------
 
 * **settings.W001**: Checks the Django settings for used but deprecated
-variables.
+  variables.
 
 Templates
 ---------
