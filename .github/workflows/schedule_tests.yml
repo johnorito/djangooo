@@ -19,7 +19,7 @@ jobs:
           - '3.10'
           - '3.11'
           - '3.12'
-          - '3.13-dev'
+          - '3.13'
     name: Windows, SQLite, Python ${{ matrix.python-version }}
     continue-on-error: true
     steps:
@@ -46,7 +46,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: '3.13'
           cache: 'pip'
       - name: Install libmemcached-dev for pylibmc
         run: sudo apt-get install libmemcached-dev
@@ -145,7 +145,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: '3.13'
           cache: 'pip'
           cache-dependency-path: 'tests/requirements/py3.txt'
       - name: Install libmemcached-dev for pylibmc
@@ -181,7 +181,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: '3.13'
           cache: 'pip'
           cache-dependency-path: 'tests/requirements/py3.txt'
       - name: Install libmemcached-dev for pylibmc
@@ -200,10 +200,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        version: [16, 17rc1]
+        version: [16, 17]
         server_side_bindings: [0, 1]
     runs-on: ubuntu-latest
-    name: Newer PostgreSQL Versions
+    name: PostgreSQL Versions
     env:
       SERVER_SIDE_BINDING: ${{ matrix.server_side_bindings }}
     services:
@@ -226,7 +226,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: '3.13'
           cache: 'pip'
           cache-dependency-path: 'tests/requirements/py3.txt'
       - name: Install libmemcached-dev for pylibmc
