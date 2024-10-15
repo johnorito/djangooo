@@ -32,6 +32,33 @@ class GeoLite2Test(SimpleTestCase):
     ipv6_addr = ipaddress.ip_address(ipv6_str)
     query_values = (fqdn, ipv4_str, ipv6_str, ipv4_addr, ipv6_addr)
 
+    expected_city = {
+        "accuracy_radius": 100,
+        "city": "Boxford",
+        "continent_code": "EU",
+        "continent_name": "Europe",
+        "country_code": "GB",
+        "country_name": "United Kingdom",
+        "is_in_european_union": False,
+        "latitude": 51.75,
+        "longitude": -1.25,
+        "metro_code": None,
+        "postal_code": "OX1",
+        "region_code": "ENG",
+        "region_name": "England",
+        "time_zone": "Europe/London",
+        # Kept for backward compatibility.
+        "dma_code": None,
+        "region": "ENG",
+    }
+    expected_country = {
+        "continent_code": "EU",
+        "continent_name": "Europe",
+        "country_code": "GB",
+        "country_name": "United Kingdom",
+        "is_in_european_union": False,
+    }
+
     @classmethod
     def setUpClass(cls):
         # Avoid referencing __file__ at module level.
@@ -100,16 +127,7 @@ class GeoLite2Test(SimpleTestCase):
         self.assertIs(g._metadata.database_type.endswith("Country"), True)
         for query in self.query_values:
             with self.subTest(query=query):
-                self.assertEqual(
-                    g.country(query),
-                    {
-                        "continent_code": "EU",
-                        "continent_name": "Europe",
-                        "country_code": "GB",
-                        "country_name": "United Kingdom",
-                        "is_in_european_union": False,
-                    },
-                )
+                self.assertEqual(g.country(query), self.expected_country)
                 self.assertEqual(g.country_code(query), "GB")
                 self.assertEqual(g.country_name(query), "United Kingdom")
 
@@ -118,16 +136,7 @@ class GeoLite2Test(SimpleTestCase):
         self.assertIs(g._metadata.database_type.endswith("City"), True)
         for query in self.query_values:
             with self.subTest(query=query):
-                self.assertEqual(
-                    g.country(query),
-                    {
-                        "continent_code": "EU",
-                        "continent_name": "Europe",
-                        "country_code": "GB",
-                        "country_name": "United Kingdom",
-                        "is_in_european_union": False,
-                    },
-                )
+                self.assertEqual(g.country(query), self.expected_country)
                 self.assertEqual(g.country_code(query), "GB")
                 self.assertEqual(g.country_name(query), "United Kingdom")
 
@@ -136,47 +145,23 @@ class GeoLite2Test(SimpleTestCase):
         self.assertIs(g._metadata.database_type.endswith("City"), True)
         for query in self.query_values:
             with self.subTest(query=query):
-                self.assertEqual(
-                    g.city(query),
-                    {
-                        "accuracy_radius": 100,
-                        "city": "Boxford",
-                        "continent_code": "EU",
-                        "continent_name": "Europe",
-                        "country_code": "GB",
-                        "country_name": "United Kingdom",
-                        "is_in_european_union": False,
-                        "latitude": 51.75,
-                        "longitude": -1.25,
-                        "metro_code": None,
-                        "postal_code": "OX1",
-                        "region_code": "ENG",
-                        "region_name": "England",
-                        "time_zone": "Europe/London",
-                        # Kept for backward compatibility.
-                        "dma_code": None,
-                        "region": "ENG",
-                    },
-                )
+                self.assertEqual(g.city(query), self.expected_city)
+
+                expected_latitude = self.expected_city["latitude"]
+                expected_longitude = self.expected_city["longitude"]
+                expected_lat_lon = (expected_latitude, expected_longitude)
+                expected_lon_lat = (expected_longitude, expected_latitude)
 
                 geom = g.geos(query)
                 self.assertIsInstance(geom, GEOSGeometry)
                 self.assertEqual(geom.srid, 4326)
-                self.assertEqual(geom.tuple, (-1.25, 51.75))
+                self.assertEqual(geom.tuple, expected_lon_lat)
 
-                self.assertEqual(g.lat_lon(query), (51.75, -1.25))
-                self.assertEqual(g.lon_lat(query), (-1.25, 51.75))
+                self.assertEqual(g.lat_lon(query), expected_lat_lon)
+                self.assertEqual(g.lon_lat(query), expected_lon_lat)
+
                 # Country queries should still work.
-                self.assertEqual(
-                    g.country(query),
-                    {
-                        "continent_code": "EU",
-                        "continent_name": "Europe",
-                        "country_code": "GB",
-                        "country_name": "United Kingdom",
-                        "is_in_european_union": False,
-                    },
-                )
+                self.assertEqual(g.country(query), self.expected_country)
                 self.assertEqual(g.country_code(query), "GB")
                 self.assertEqual(g.country_name(query), "United Kingdom")
 
