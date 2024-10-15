@@ -10,4 +10,5 @@ Django 5.1.3 fixes several bugs in 5.1.2 and adds compatibility with Python
 Bugfixes
 ========
 
-* ...
+* Fixed a regression in Django 5.1 that prevented use of DB-IP databases with
+  :class:`~django.contrib.gis.geoip2.GeoIP2` (:ticket:`33442`).
