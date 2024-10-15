@@ -119,6 +119,12 @@ upgrading Django.
   :setting:`CSRF_TRUSTED_ORIGINS` setting must start with a scheme (usually
   ``http://`` or ``https://``) but found ``<hostname>``.
 
+Deprecated settings
+-------------------
+
+* **settings.W001**: Checks the Django settings for used but deprecated
+  variables.
+
 Caches
 ------
 
@@ -566,12 +572,6 @@ Signals
 * **signals.E001**: ``<handler>`` was connected to the ``<signal>`` signal with
   a lazy reference to the sender ``<app label>.<model>``, but app ``<app label>``
   isn't installed or doesn't provide model ``<model>``.
-
-Settings
---------
-
-* **settings.W001**: Checks the Django settings for used but deprecated
-  variables.
 
 Templates
 ---------
