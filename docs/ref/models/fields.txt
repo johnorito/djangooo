@@ -407,9 +407,8 @@ or a database function, such as :class:`~django.db.models.functions.Now`::
     created = models.DateTimeField(db_default=Now())
 
 It allows you to specify default values for fields that are computed at the
-database level. :class:`~django.db.models.DatabaseDefault`:: class is an
-internal class which provides a mechanism to allow db_default to store
-values at database level.
+database level. DatabaseDefault class is an internal class which provides a
+mechanism to allow db_default to store values at database level.
 
 More complex expressions can be used, as long as they are made from literals
 and database functions::
