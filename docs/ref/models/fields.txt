@@ -427,7 +427,8 @@ set at the database level and will be used when inserting rows outside of the
 ORM or when adding a new field in a migration.
 
 ..note::
-    DatabaseDefault() class is an internal class which provides a
+
+    ''DatabaseDefault()'' class is an internal class which provides a
     mechanism to allow db_default to store values at database level.
 
 ``db_index``
