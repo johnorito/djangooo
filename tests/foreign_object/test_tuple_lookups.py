@@ -138,7 +138,7 @@ class TupleLookupsTests(TestCase):
         with self.assertRaisesMessage(
             ValueError,
             "'in' subquery lookup of ('customer_code', 'company_code') "
-            "must be a Query object",
+            "must be a Query object (received 'In')",
         ):
             TupleIn(lhs, rhs)
 
@@ -148,7 +148,7 @@ class TupleLookupsTests(TestCase):
         with self.assertRaisesMessage(
             ValueError,
             "'in' subquery lookup of ('customer_code', 'company_code') "
-            "must have 2 fields",
+            "must have 2 fields (received 1)",
         ):
             TupleIn(lhs, rhs)
 
