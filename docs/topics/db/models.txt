@@ -224,6 +224,11 @@ ones:
     object. If callable it will be called every time a new object is
     created.
 
+:attr:`~Field.db_default`
+    The default value for the field. This can be a literal value or a
+    database function. It allows you to specify default values for fields
+    that are computed at the database level.
+
 :attr:`~Field.help_text`
     Extra "help" text to be displayed with the form widget. It's useful for
     documentation even if your field isn't used on a form.
