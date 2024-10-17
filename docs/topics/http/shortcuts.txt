@@ -107,10 +107,24 @@ This example is equivalent to::
    * An absolute or relative URL, which will be used as-is for the redirect
      location.
 
-   By default issues a temporary redirect; pass ``permanent=True`` to issue a
-   permanent redirect.
+   By default, this issues a temporary redirect (status code 302).
 
-   If ``preserve_method=True``, the redirect preserves the original HTTP method.
+   If ``permanent=True``, this issues a permanent redirect (status code 301).
+
+   If ``preserve_method=True``, the method and body of the original request are
+   reused to perform the redirected request. Temporary redirects then have a
+   307 status code and permanent redirects have a 308 status code.
+
+   This is illustrated in the following table:
+
+   ================  =========  ===============
+   HTTP status code  permanent  preserve_method
+   ================  =========  ===============
+   301               ``True``   ``False``
+   302               ``False``  ``False``
+   307               ``False``  ``True``
+   308               ``True``   ``True``
+   ================  =========  ===============
 
    .. versionchanged:: 5.2
 
