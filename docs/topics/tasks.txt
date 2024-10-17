@@ -1,0 +1,135 @@
+========================
+Django's tasks framework
+========================
+
+For a web application, there's often more than just turning HTTP requests into
+HTTP responses. For some functionality, it may be beneficial to run code outside
+of the request-response cycle.
+
+That's where background tasks come in.
+
+Background tasks can offload complexity outside of the request-response cycle,
+to be run somewhere else, potentially at a later date. This keeps requests fast,
+latency down, and improves the user's experience.
+
+Background task fundamentals
+============================
+
+When work needs to be done in the background, Django creates a Task, which is
+stored in the Queue Store. This task contains all of the metadata needed to
+execute the task, as well as a unique identifier for Django to retrieve the
+result later.
+
+Outside of Django, a Worker looks at the Queue Store for new Tasks to run. When
+a new Task is added, the Worker claims the task, executes it, and saves the
+status and result back to the Queue Store.
+
+.. _configuring-a-task-backend:
+
+Configuring a Task backend
+==========================
+
+Background tasks require some work to set up.
+
+Different task backends have different characteristics and configuration options,
+which may impact the performance and reliability of your application.
+
+Task backends are configured using the :setting:`TASKS` setting in your settings
+file.
+
+.. _immediate-task-backend:
+
+Immediate execution
+-------------------
+
+This is the default backend if another is not specified in your settings file.
+The immediate backend runs enqueued tasks immediately, rather than in the
+background. This allows background task functionality to be slowly added
+to an application, before the required infrastructure is available.
+
+.. warning::
+
+    When :setting:`ENQUEUE_ON_COMMIT <TASKS-ENQUEUE_ON_COMMIT>` is ``False``,
+    the task will be executed within the same transaction it was enqueued in.
+
+    This may lead to unexpected behavior changes when changing backend in future.
+
+To use it, set :setting:`BACKEND <TASKS-BACKEND>` to
+``"django.tasks.backends.immediate.ImmediateBackend"``::
+
+    TASKS = {"default": {"BACKEND": "django.tasks.backends.immediate.ImmediateBackend"}}
+
+.. _dummy-task-backend:
+
+Dummy backend
+-------------
+
+The dummy backend doesn't execute enqueued tasks at all, instead storing results
+for later use.
+
+This backend is not intended for use in production - it is provided as a
+convenience that can be used during development and testing.
+
+To use it, set :setting:`BACKEND <TASKS-BACKEND>` to
+``"django.tasks.backends.dummy.DummyBackend"``::
+
+    TASKS = {"default": {"BACKEND": "django.tasks.backends.dummy.DummyBackend"}}
+
+The results for enqueued tasks can be retrieved from the backend's
+:attr:`results <django.tasks.backends.dummy.DummyBackend.results>` attribute::
+
+    from django.tasks import default_task_backend
+
+    my_task.enqueue()
+
+    assert len(default_task_backend.results) == 1
+
+Stored results can be cleared using the
+:meth:`clear <django.tasks.backends.dummy.DummyBackend.clear>` method::
+
+    default_task_backend.clear()
+
+    assert len(default_task_backend.results) == 0
+
+Using a custom backend
+----------------------
+
+While Django includes support for a number of task backends out-of-the-box,
+sometimes you might want to customize the the task backend. To use an external
+task backend with Django, use the Python import path as the
+:setting:`BACKEND <TASKS-BACKEND>` of the :setting:`TASKS` setting, like so::
+
+    TASKS = {
+        "default": {
+            "BACKEND": "path.to.backend",
+        }
+    }
+
+If you're building your own backend, you can use the standard task backends
+as reference implementations. You'll find the code in the
+:source:`django/tasks/backends/` directory of the Django source.
+
+Backend arguments
+-----------------
+
+Each backend can be given additional arguments to control its behavior.
+These arguments are provided as additional keys in the :setting:`TASKS` setting.
+Valid arguments are as follows:
+
+* :setting:`ENQUEUE_ON_COMMIT <TASKS-ENQUEUE_ON_COMMIT>`: Whether a task should
+  be enqueued at the end of the current transaction (if there
+  is one) commits successfully, rather than enqueueing immediately. This argument
+  defaults to ``True``.
+
+* :setting:`QUEUES <TASKS-QUEUES>`: Restrict the queue names a task may be
+  enqueued to. By default, only the ``"default"`` queue is allowed. Queue name
+  validation can be disabled by setting this to an empty list.
+
+Asynchronous support
+--------------------
+
+Django has developing support for asynchronous task backends.
+
+``django.tasks.backends.base.BaseTaskBackend`` has async variants of all base
+methods. By convention, the asynchronous versions of all methods are prefixed
+with ``a``. The arguments for both variants are the same.
