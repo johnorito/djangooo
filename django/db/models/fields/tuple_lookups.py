@@ -307,7 +307,7 @@ class TupleIn(TupleLookupMixin, In):
     def as_subquery(self, compiler, connection):
         if not connection.features.supports_tuple_in_subquery:
             raise NotSupportedError(
-                "TupleIn subqueries are not supported on this database backend."
+                f"{connection.display_name} doesn't support TupleIn subqueries."
             )
         return compiler.compile(In(self.lhs, self.rhs))
 

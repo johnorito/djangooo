@@ -180,7 +180,7 @@ class TupleLookupsTests(TestCase):
         lookup = TupleIn(lhs, rhs)
         with self.assertRaisesMessage(
             NotSupportedError,
-            "TupleIn subqueries are not supported on this database backend.",
+            f"{connection.display_name} doesn't support TupleIn subqueries.",
         ):
             self.assertSequenceEqual(Contact.objects.filter(lookup), [])
 
