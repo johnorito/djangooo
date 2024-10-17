@@ -428,9 +428,7 @@ ORM or when adding a new field in a migration.
 
 If a field is configured with db_default but lacks a default, accessing the field
 on an unsaved model instance, where no value has been explicitly assigned,
-will return a DatabaseDefault object.
-
-.. code-block:: python
+will return a DatabaseDefault object::
 
     from django.db import models
     from django.db.models.functions import Now
