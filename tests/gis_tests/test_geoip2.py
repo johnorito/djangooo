@@ -32,6 +32,33 @@ class GeoLite2Test(SimpleTestCase):
     ipv6_addr = ipaddress.ip_address(ipv6_str)
     query_values = (fqdn, ipv4_str, ipv6_str, ipv4_addr, ipv6_addr)
 
+    expected_city = {
+        "accuracy_radius": 100,
+        "city": "Boxford",
+        "continent_code": "EU",
+        "continent_name": "Europe",
+        "country_code": "GB",
+        "country_name": "United Kingdom",
+        "is_in_european_union": False,
+        "latitude": 51.75,
+        "longitude": -1.25,
+        "metro_code": None,
+        "postal_code": "OX1",
+        "region_code": "ENG",
+        "region_name": "England",
+        "time_zone": "Europe/London",
+        # Kept for backward compatibility.
+        "dma_code": None,
+        "region": "ENG",
+    }
+    expected_country = {
+        "continent_code": "EU",
+        "continent_name": "Europe",
+        "country_code": "GB",
+        "country_name": "United Kingdom",
+        "is_in_european_union": False,
+    }
+
     @classmethod
     def setUpClass(cls):
         # Avoid referencing __file__ at module level.
@@ -97,86 +124,47 @@ class GeoLite2Test(SimpleTestCase):
 
     def test_country(self):
         g = GeoIP2(city="<invalid>")
-        self.assertIs(g._metadata.database_type.endswith("Country"), True)
+        self.assertIs(g.is_city, False)
+        self.assertIs(g.is_country, True)
         for query in self.query_values:
             with self.subTest(query=query):
-                self.assertEqual(
-                    g.country(query),
-                    {
-                        "continent_code": "EU",
-                        "continent_name": "Europe",
-                        "country_code": "GB",
-                        "country_name": "United Kingdom",
-                        "is_in_european_union": False,
-                    },
-                )
+                self.assertEqual(g.country(query), self.expected_country)
                 self.assertEqual(g.country_code(query), "GB")
                 self.assertEqual(g.country_name(query), "United Kingdom")
 
     def test_country_using_city_database(self):
         g = GeoIP2(country="<invalid>")
-        self.assertIs(g._metadata.database_type.endswith("City"), True)
+        self.assertIs(g.is_city, True)
+        self.assertIs(g.is_country, False)
         for query in self.query_values:
             with self.subTest(query=query):
-                self.assertEqual(
-                    g.country(query),
-                    {
-                        "continent_code": "EU",
-                        "continent_name": "Europe",
-                        "country_code": "GB",
-                        "country_name": "United Kingdom",
-                        "is_in_european_union": False,
-                    },
-                )
+                self.assertEqual(g.country(query), self.expected_country)
                 self.assertEqual(g.country_code(query), "GB")
                 self.assertEqual(g.country_name(query), "United Kingdom")
 
     def test_city(self):
         g = GeoIP2(country="<invalid>")
-        self.assertIs(g._metadata.database_type.endswith("City"), True)
+        self.assertIs(g.is_city, True)
+        self.assertIs(g.is_country, False)
         for query in self.query_values:
             with self.subTest(query=query):
-                self.assertEqual(
-                    g.city(query),
-                    {
-                        "accuracy_radius": 100,
-                        "city": "Boxford",
-                        "continent_code": "EU",
-                        "continent_name": "Europe",
-                        "country_code": "GB",
-                        "country_name": "United Kingdom",
-                        "is_in_european_union": False,
-                        "latitude": 51.75,
-                        "longitude": -1.25,
-                        "metro_code": None,
-                        "postal_code": "OX1",
-                        "region_code": "ENG",
-                        "region_name": "England",
-                        "time_zone": "Europe/London",
-                        # Kept for backward compatibility.
-                        "dma_code": None,
-                        "region": "ENG",
-                    },
-                )
+                self.assertEqual(g.city(query), self.expected_city)
+
+                expected_latitude = self.expected_city["latitude"]
+                expected_longitude = self.expected_city["longitude"]
+                expected_lat_lon = (expected_latitude, expected_longitude)
+                expected_lon_lat = (expected_longitude, expected_latitude)
 
                 geom = g.geos(query)
                 self.assertIsInstance(geom, GEOSGeometry)
                 self.assertEqual(geom.srid, 4326)
-                self.assertEqual(geom.tuple, (-1.25, 51.75))
+                self.assertEqual(geom.tuple, expected_lon_lat)
 
-                self.assertEqual(g.lat_lon(query), (51.75, -1.25))
-                self.assertEqual(g.lon_lat(query), (-1.25, 51.75))
+                self.assertEqual(g.lat_lon(query), expected_lat_lon)
+                self.assertEqual(g.lon_lat(query), expected_lon_lat)
+
                 # Country queries should still work.
-                self.assertEqual(
-                    g.country(query),
-                    {
-                        "continent_code": "EU",
-                        "continent_name": "Europe",
-                        "country_code": "GB",
-                        "country_name": "United Kingdom",
-                        "is_in_european_union": False,
-                    },
-                )
+                self.assertEqual(g.country(query), self.expected_country)
                 self.assertEqual(g.country_code(query), "GB")
                 self.assertEqual(g.country_name(query), "United Kingdom")
 
@@ -228,6 +216,27 @@ class GeoLite2Test(SimpleTestCase):
 )
 class GeoIP2Test(GeoLite2Test):
     """Non-free GeoIP2 databases are supported."""
+
+
+@skipUnless(HAS_GEOIP2, "GeoIP2 is required.")
+@override_settings(
+    GEOIP_CITY="dbip-city-lite-test.mmdb",
+    GEOIP_COUNTRY="dbip-country-lite-test.mmdb",
+)
+class DBIPLiteTest(GeoLite2Test):
+    """DB-IP Lite databases are supported."""
+
+    expected_city = GeoLite2Test.expected_city | {
+        "accuracy_radius": None,
+        "city": "London (Shadwell)",
+        "latitude": 51.5181,
+        "longitude": -0.0714189,
+        "postal_code": None,
+        "region_code": None,
+        "time_zone": None,
+        # Kept for backward compatibility.
+        "region": None,
+    }
 
 
 @skipUnless(HAS_GEOIP2, "GeoIP2 is required.")
