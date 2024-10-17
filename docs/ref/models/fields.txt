@@ -436,8 +436,8 @@ will return a DatabaseDefault object.
     from django.db.models.functions import Now
 
     class MyModel(models.Model):
-    # No default provided at the Django (Python) level, only db_default
-    created = models.DateTimeField(db_default=Now())
+        # No default provided at the Django (Python) level, only db_default
+        created = models.DateTimeField(db_default=Now())
 
 .. code-block:: shell
 
